@@ -1,0 +1,497 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+  security-events: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Cache .NET packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          **/bin/Release/
+          **/obj/Release/
+        retention-days: 1
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Check for vulnerable packages
+      run: |
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerable-packages.txt
+        if grep -q "has the following vulnerable packages" vulnerable-packages.txt; then
+          echo "⚠️ Pacotes vulneráveis detectados!"
+          cat vulnerable-packages.txt
+          exit 1
+        fi
+    
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: csharp
+    
+    - name: Build for CodeQL
+      run: dotnet build --configuration Release
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Cache .NET packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Run unit tests with coverage
+      run: |
+        dotnet test tests/FCG.Users.UnitTests/FCG.Users.UnitTests.csproj \
+          --configuration Release \
+          --no-build \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults/UnitTests \
+          --logger "trx;LogFileName=unit-tests.trx" \
+          --verbosity normal \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+    
+    - name: Upload unit test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-test-results
+        path: ./TestResults/UnitTests/
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Cache .NET packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Run integration tests with coverage
+      run: |
+        dotnet test tests/FCG.Users.IntegratedTests/FCG.Users.IntegratedTests.csproj \
+          --configuration Release \
+          --no-build \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults/IntegrationTests \
+          --logger "trx;LogFileName=integration-tests.trx" \
+          --verbosity normal \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+    
+    - name: Upload integration test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: integration-test-results
+        path: ./TestResults/IntegrationTests/
+
+  functional-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Cache .NET packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Run functional tests
+      run: |
+        dotnet test tests/FCG.Users.FunctionalTests/FCG.Users.FunctionalTests.csproj \
+          --configuration Release \
+          --no-build \
+          --results-directory ./TestResults/FunctionalTests \
+          --logger "trx;LogFileName=functional-tests.trx" \
+          --verbosity normal
+    
+    - name: Upload functional test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: functional-test-results
+        path: ./TestResults/FunctionalTests/
+
+  coverage-analysis:
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    if: always() && (needs.unit-tests.result == 'success' || needs.integration-tests.result == 'success')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install coverage tools
+      run: dotnet tool install --global dotnet-reportgenerator-globaltool
+    
+    - name: Download unit test results
+      uses: actions/download-artifact@v4
+      with:
+        name: unit-test-results
+        path: ./TestResults/UnitTests/
+      continue-on-error: true
+    
+    - name: Download integration test results
+      uses: actions/download-artifact@v4
+      with:
+        name: integration-test-results  
+        path: ./TestResults/IntegrationTests/
+      continue-on-error: true
+    
+    - name: List downloaded coverage files
+      run: |
+        echo "📊 Arquivos de cobertura encontrados:"
+        find ./TestResults -name "coverage.opencover.xml" -o -name "coverage.cobertura.xml" | sort
+    
+    - name: Generate merged coverage report
+      run: |
+        coverage_files=$(find ./TestResults -name "coverage.opencover.xml" -type f | tr '\n' ';' | sed 's/;$//')
+        
+        if [ -z "$coverage_files" ]; then
+          echo "⚠️ Nenhum arquivo de cobertura encontrado"
+          mkdir -p ./CoverageReports
+          echo '<?xml version="1.0" encoding="UTF-8"?><coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0" version="1.0" timestamp="0"></coverage>' > ./CoverageReports/Cobertura.xml
+        else
+          echo "✅ Gerando relatório com: $coverage_files"
+          reportgenerator \
+            -reports:"$coverage_files" \
+            -targetdir:"./CoverageReports" \
+            -reporttypes:"Cobertura;HtmlInline_AzurePipelines;JsonSummary" \
+            -filefilters:"-**/tests/**;-**/FCG.Users.UnitTests/**;-**/FCG.Users.IntegratedTests/**;-**/FCG.Users.FunctionalTests/**;-**/FCG.Users.CommomTestsUtilities/**" \
+            -classfilters:"-FCG.Users.UnitTests.*;-FCG.Users.IntegratedTests.*;-FCG.Users.FunctionalTests.*;-*.Tests.*;-*TestsUtilities.*" \
+            -verbosity:Info
+        fi
+    
+    - name: Parse coverage results
+      id: coverage
+      run: |
+        if [ -f "./CoverageReports/Summary.json" ]; then
+          line_coverage=$(cat ./CoverageReports/Summary.json | grep -o '"linecoverage": *"[^"]*"' | cut -d'"' -f4 | head -1)
+          branch_coverage=$(cat ./CoverageReports/Summary.json | grep -o '"branchcoverage": *"[^"]*"' | cut -d'"' -f4 | head -1)
+          
+          if [ ! -z "$line_coverage" ]; then
+            coverage_percent=$(echo "$line_coverage" | sed 's/%//')
+            echo "coverage_percent=$coverage_percent" >> $GITHUB_OUTPUT
+            echo "branch_percent=${branch_coverage:-0}" >> $GITHUB_OUTPUT
+            echo "📈 Cobertura de Linhas: $line_coverage"
+            echo "📈 Cobertura de Branches: $branch_coverage"
+          else
+            echo "coverage_percent=0" >> $GITHUB_OUTPUT
+            echo "branch_percent=0" >> $GITHUB_OUTPUT
+          fi
+        elif [ -f "./CoverageReports/Cobertura.xml" ]; then
+          coverage=$(grep -o 'line-rate="[^"]*"' ./CoverageReports/Cobertura.xml | head -1 | cut -d'"' -f2 || echo "0")
+          branch_rate=$(grep -o 'branch-rate="[^"]*"' ./CoverageReports/Cobertura.xml | head -1 | cut -d'"' -f2 || echo "0")
+          
+          if [ ! -z "$coverage" ] && [ "$coverage" != "0" ]; then
+            coverage_percent=$(printf "%.1f" $(echo "$coverage * 100" | bc -l))
+            branch_percent=$(printf "%.1f" $(echo "$branch_rate * 100" | bc -l))
+            echo "coverage_percent=$coverage_percent" >> $GITHUB_OUTPUT
+            echo "branch_percent=$branch_percent" >> $GITHUB_OUTPUT
+            echo "📈 Cobertura: $coverage_percent%"
+          else
+            echo "coverage_percent=0" >> $GITHUB_OUTPUT
+            echo "branch_percent=0" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "coverage_percent=0" >> $GITHUB_OUTPUT
+          echo "branch_percent=0" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Create coverage summary comment
+      if: github.event_name == 'pull_request'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COVERAGE_THRESHOLD: 80
+      run: |
+        coverage_percent=${{ steps.coverage.outputs.coverage_percent }}
+        branch_percent=${{ steps.coverage.outputs.branch_percent }}
+        threshold=${COVERAGE_THRESHOLD:-80}
+        
+        # Extrair números inteiros para comparação
+        coverage_int=$(echo "$coverage_percent" | cut -d'.' -f1)
+        
+        # Determinar status
+        if [ "$coverage_int" -lt "$threshold" ]; then
+          status="⚠️"
+          status_text="Cobertura Abaixo do Esperado"
+          emoji="🔴"
+          message="Por favor, adicione mais testes para atingir a cobertura mínima antes de fazer o merge deste PR."
+          difference="-$((threshold - coverage_int))%"
+        else
+          status="✅"
+          status_text="Cobertura Aprovada"
+          emoji="🟢"
+          message="Excelente trabalho! A cobertura de testes está acima do threshold esperado."
+          difference="+$((coverage_int - threshold))%"
+        fi
+        
+        cat > comment.md << EOF
+        ## ${status} ${status_text}
+        
+        ### 📊 Resultados da Cobertura de Código
+        
+        | Métrica | Valor | Status |
+        |---------|-------|--------|
+        | **Cobertura de Linhas** | \`${coverage_percent}%\` | ${emoji} |
+        | **Cobertura de Branches** | \`${branch_percent}%\` | ${emoji} |
+        | **Threshold Mínimo** | \`${threshold}%\` | - |
+        | **Diferença** | \`${difference}\` | - |
+        
+        ${message}
+        
+        ---
+        
+        <details>
+        <summary>📈 Ver Detalhes</summary>
+        
+        - **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+        - **Commit:** \`${{ github.event.pull_request.head.sha }}\`
+        - **Branch:** \`${{ github.head_ref }}\`
+        
+        </details>
+        
+        ---
+        *🤖 Comentário gerado automaticamente pelo CI/CD Pipeline*
+        EOF
+        
+        gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
+    
+    - name: Upload coverage reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: ./CoverageReports/
+        retention-days: 30
+    
+    - name: Check coverage threshold
+      env:
+        COVERAGE_THRESHOLD: 80
+      run: |
+        coverage_percent=${{ steps.coverage.outputs.coverage_percent }}
+        threshold=${COVERAGE_THRESHOLD:-80}
+        coverage_int=$(echo "$coverage_percent" | cut -d'.' -f1)
+        
+        echo "📊 Cobertura atual: ${coverage_percent}%"
+        echo "🎯 Threshold mínimo: ${threshold}%"
+        
+        if [ "$coverage_int" -lt "$threshold" ]; then
+          echo "❌ Cobertura ${coverage_percent}% está abaixo do threshold de ${threshold}%"
+          exit 1
+        else
+          echo "✅ Cobertura ${coverage_percent}% atende o threshold de ${threshold}%"
+        fi
+
+  sonar-analysis:
+    runs-on: ubuntu-latest
+    needs: [build, unit-tests, integration-tests]
+    if: needs.build.result == 'success'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Cache SonarCloud packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+    
+    - name: Cache .NET packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Install SonarScanner
+      run: dotnet tool install --global dotnet-sonarscanner
+    
+    - name: Download test results
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '*-test-results'
+        path: ./TestResults/
+        merge-multiple: true
+      continue-on-error: true
+    
+    - name: Begin SonarCloud analysis
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+        SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+      run: |
+        dotnet sonarscanner begin \
+          /k:"$SONAR_PROJECT_KEY" \
+          /o:"$SONAR_ORGANIZATION" \
+          /d:sonar.host.url="https://sonarcloud.io" \
+          /d:sonar.token="$SONAR_TOKEN" \
+          /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
+          /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
+          /d:sonar.coverage.exclusions="**/tests/**,**/FCG.Users.UnitTests/**,**/FCG.Users.IntegratedTests/**,**/FCG.Users.FunctionalTests/**,**/FCG.Users.CommomTestsUtilities/**,**/Migrations/**,**/Program.cs" \
+          /d:sonar.test.exclusions="**/tests/**,**/FCG.Users.UnitTests/**,**/FCG.Users.IntegratedTests/**,**/FCG.Users.FunctionalTests/**,**/FCG.Users.CommomTestsUtilities/**" \
+          /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**" \
+          /d:sonar.cpd.exclusions="**/Migrations/**,**/Program.cs"
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Run all tests with coverage
+      run: |
+        dotnet test \
+          --no-build \
+          --configuration Release \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults/SonarCloud \
+          --logger trx \
+          --verbosity minimal \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
+             DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByFile="**/Migrations/**" \
+             DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute="Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute"
+      continue-on-error: true
+    
+    - name: Display coverage files for SonarCloud
+      run: |
+        echo "📁 Arquivos de cobertura para análise:"
+        find ./TestResults -name "coverage.opencover.xml" -type f 2>/dev/null | head -20 || echo "Nenhum arquivo encontrado"
+    
+    - name: End SonarCloud analysis
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
