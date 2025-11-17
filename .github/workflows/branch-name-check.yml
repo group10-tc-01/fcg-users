@@ -1,4 +1,4 @@
-﻿﻿name: Check Branch Name
+name: Check Branch Name
 
 on:
   pull_request_target:
@@ -31,9 +31,9 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const branchName = "${{ steps.check.outputs.branch_name }}";
             const body = `
-            ❌ Branch name \`${branchName}\` does not follow Git Flow naming convention.
+             Branch name `${branchName}` does not follow Git Flow naming convention.
 
-            ✅ Valid patterns: \`feature/*\`, \`release/*\`, \`hotfix/*\`
+             Valid patterns: `feature/*`, `release/*`, `hotfix/*`
 
             Examples:
             - feature/add-new-component
