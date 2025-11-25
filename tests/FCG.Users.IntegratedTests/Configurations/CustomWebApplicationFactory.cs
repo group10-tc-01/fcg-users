@@ -52,6 +52,21 @@ namespace FCG.Users.IntegratedTests.Configurations
             {
                 services.Remove(descriptor);
             }
+
+            RemoveKafkaServices(services);
+        }
+
+        private static void RemoveKafkaServices(IServiceCollection services)
+        {
+            var kafkaDescriptorsToRemove = services.Where(d =>
+                d.ServiceType.FullName?.Contains("Kafka") == true ||
+                d.ImplementationType?.FullName?.Contains("Kafka") == true)
+                .ToList();
+
+            foreach (var descriptor in kafkaDescriptorsToRemove)
+            {
+                services.Remove(descriptor);
+            }
         }
 
         private void EnsureDatabaseSeeded(IServiceCollection services)

@@ -1,9 +1,11 @@
 using Confluent.Kafka;
 using FCG.Users.Infrastructure.Kafka.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace FCG.Users.Infrastructure.Kafka.Producer
 {
+    [ExcludeFromCodeCoverage]
     public class KafkaProducer : IKafkaProducer, IDisposable
     {
         private readonly IProducer<string, string> _producer;

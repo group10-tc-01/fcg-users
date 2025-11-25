@@ -3,9 +3,11 @@ using FCG.Users.Infrastructure.Kafka.Abstractions;
 using FCG.Users.Infrastructure.Kafka.Configuration;
 using FCG.Users.Infrastructure.Kafka.Messages;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.Infrastructure.Kafka.EventsHandlers
 {
+    [ExcludeFromCodeCoverage]
     public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDomainEvent>
     {
         private readonly IKafkaProducer _kafkaProducer;

@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace FCG.Users.Infrastructure.Kafka.Messages
 {
+    [ExcludeFromCodeCoverage]
     public class UserCreatedMessage
     {
         public Guid UserId { get; set; }

@@ -26,6 +26,7 @@ namespace FCG.Users.Infrastructure.Kafka.DependencyInjection
                 BootstrapServers = configuration["Kafka:BootstrapServers"] ?? string.Empty,
                 UserCreatedTopic = configuration["Kafka:UserCreatedTopic"] ?? string.Empty
             };
+
             services.AddSingleton(kafkaSettings);
 
             services.AddSingleton<IKafkaProducer>(sp =>
