@@ -1,5 +1,8 @@
 ﻿using FCG.Users.Application.UseCases.Users.Register;
 using FCG.Users.CommomTestsUtilities.Builders.Users;
+using FCG.Users.Domain.Abstractions;
+using FCG.Users.Domain.Users;
+using Moq;
 
 namespace FCG.Users.FunctionalTests.Fixtures.Users
 {
@@ -10,7 +13,10 @@ namespace FCG.Users.FunctionalTests.Fixtures.Users
 
         public RegisterUserFixture()
         {
-            RegisterUserUseCase = new RegisterUserUseCase();
+            var userRepository = new Mock<IUserRepository>().Object;
+            var unitOfWork = new Mock<IUnitOfWork>().Object;
+
+            RegisterUserUseCase = new RegisterUserUseCase(userRepository, unitOfWork);
             RegisterUserRequest = new RegisterUserRequestBuilder().Build();
         }
     }

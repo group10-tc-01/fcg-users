@@ -1,4 +1,5 @@
-﻿using FCG.Users.CommomTestsUtilities.Builders.Users;
+﻿using FCG.Users.Application.UseCases.Users.Register;
+using FCG.Users.CommomTestsUtilities.Builders.Users;
 using FCG.Users.IntegratedTests.Configurations;
 using FCG.Users.WebApi.Models;
 using FluentAssertions;
@@ -22,7 +23,7 @@ namespace FCG.Users.IntegratedTests.Controllers
             // Act
             var result = await DoPost(RegisterUrl, request);
             var responseContent = await result.Content.ReadAsStringAsync();
-            var apiResponse = JsonSerializer.Deserialize<ApiResponse<Guid>>(responseContent, new JsonSerializerOptions
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<RegisterUserResponse>>(responseContent, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
@@ -30,6 +31,7 @@ namespace FCG.Users.IntegratedTests.Controllers
             // Assert
             result.StatusCode.Should().Be(HttpStatusCode.Created);
             apiResponse.Should().NotBeNull();
+            apiResponse.Data.Id.Should().NotBeEmpty();
         }
     }
 }

@@ -83,7 +83,7 @@ namespace FCG.Users.IntegratedTests.Configurations
 
             for (int i = 1; i <= itemsQuantity; i++)
             {
-                var user = new UserBuilder().BuildRegularUser();
+                var user = new UserBuilder().Build();
                 users.Add(user);
             }
 

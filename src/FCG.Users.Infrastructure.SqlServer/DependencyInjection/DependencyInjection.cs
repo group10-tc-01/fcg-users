@@ -1,4 +1,7 @@
-﻿using FCG.Users.Infrastructure.SqlServer.Persistance;
+﻿using FCG.Users.Domain.Abstractions;
+using FCG.Users.Domain.Users;
+using FCG.Users.Infrastructure.SqlServer.Persistance;
+using FCG.Users.Infrastructure.SqlServer.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +33,9 @@ namespace FCG.Users.Infrastructure.SqlServer.DependencyInjection
 
         private static void AddRepositories(this IServiceCollection services)
         {
+            services.AddScoped<IUserRepository, UserRepository>();
 
+            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<FcgUserDbContext>());
         }
 
         private static void AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)

@@ -11,9 +11,9 @@ namespace FCG.Users.Domain.Users
         public Password Password { get; private set; } = null!;
         public Role Role { get; private set; }
 
-        public static User Create(string name, string email, string password, Role role)
+        public static User CreateRegularUser(string name, string email, string password)
         {
-            var user = new User(name, email, password, role);
+            var user = new User(name, email, password, Role.User);
 
             user.RaiseDomainEvent(new UserCreatedDomainEvent(user.Id, user.Name, user.Email));
 

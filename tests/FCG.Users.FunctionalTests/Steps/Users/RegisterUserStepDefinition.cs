@@ -10,7 +10,7 @@ namespace FCG.Users.FunctionalTests.Steps.Users
     {
         private readonly FixtureManager _fixtureManager = fixtureManager;
         private RegisterUserRequest? _registerUserRequest;
-        private Guid? _registerUserResponse;
+        private RegisterUserResponse? _registerUserResponse;
         private Exception? _exception;
 
         [Given(@"a criacao de um novo usuario")]

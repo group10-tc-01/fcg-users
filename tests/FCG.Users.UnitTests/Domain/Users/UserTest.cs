@@ -14,7 +14,7 @@ namespace FCG.Users.UnitTests.Domain.Users
             var userBuilder = new UserBuilder().Build();
 
             // Act
-            var user = User.Create(userBuilder.Name, userBuilder.Email, userBuilder.Password, userBuilder.Role);
+            var user = User.CreateRegularUser(userBuilder.Name, userBuilder.Email, userBuilder.Password);
 
             // Assert
             user.Should().NotBeNull();
@@ -62,7 +62,7 @@ namespace FCG.Users.UnitTests.Domain.Users
             var userBuilder = new UserBuilder().Build();
 
             // Act
-            var user = User.Create(userBuilder.Name, userBuilder.Email, userBuilder.Password, userBuilder.Role);
+            var user = User.CreateRegularUser(userBuilder.Name, userBuilder.Email, userBuilder.Password);
             var domainEvents = user.GetDomainEvents();
 
             // Assert
@@ -81,7 +81,7 @@ namespace FCG.Users.UnitTests.Domain.Users
         {
             // Arrange
             var userBuilder = new UserBuilder().Build();
-            var user = User.Create(userBuilder.Name, userBuilder.Email, userBuilder.Password, userBuilder.Role);
+            var user = User.CreateRegularUser(userBuilder.Name, userBuilder.Email, userBuilder.Password);
 
             user.GetDomainEvents().Should().HaveCount(1);
 
@@ -99,7 +99,7 @@ namespace FCG.Users.UnitTests.Domain.Users
         {
             // Arrange
             var userBuilder = new UserBuilder().Build();
-            var user = User.Create(userBuilder.Name, userBuilder.Email, userBuilder.Password, userBuilder.Role);
+            var user = User.CreateRegularUser(userBuilder.Name, userBuilder.Email, userBuilder.Password);
             user.ClearDomainEvents();
 
             // Act

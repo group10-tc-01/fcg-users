@@ -1,17 +1,37 @@
-﻿namespace FCG.Users.Application.UseCases.Users.Register
+﻿using FCG.Users.Domain.Abstractions;
+using FCG.Users.Domain.Exceptions;
+using FCG.Users.Domain.Users;
+using FCG.Users.Messages;
+
+namespace FCG.Users.Application.UseCases.Users.Register
 {
     public class RegisterUserUseCase : IRegisterUserUseCase
     {
-        public Task<Guid> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
+        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public RegisterUserUseCase(IUserRepository userRepository, IUnitOfWork unitOfWork)
         {
-            if (request.Email != "flaviojcostafilho@gmail.com")
+            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<RegisterUserResponse> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
+        {
+            var existingUser = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+
+            if (existingUser != null)
             {
-                return Task.FromResult(Guid.NewGuid());
+                throw new ConflictException(ResourceMessages.EmailAlreadyInUse);
             }
-            else
-            {
-                throw new Exception("User registration failed.");
-            }
+
+            var user = User.CreateRegularUser(request.Name, request.Email, request.Password);
+
+            await _userRepository.AddAsync(user);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return new RegisterUserResponse(user.Id);
         }
     }
 }
