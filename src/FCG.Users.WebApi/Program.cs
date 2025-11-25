@@ -1,4 +1,5 @@
 using FCG.Users.Application.DependencyInjection;
+using FCG.Users.Infrastructure.Kafka.DependencyInjection;
 using FCG.Users.Infrastructure.SqlServer.DependencyInjection;
 using FCG.Users.WebApi.DependencyInjection;
 using FCG.Users.WebApi.Extensions;
@@ -21,6 +22,7 @@ namespace FCG.Users.WebApi
 
             builder.Services.AddWebApi();
             builder.Services.AddApplication();
+            builder.Services.AddKafkaInfrastructure(builder.Configuration);
             builder.Services.AddInfrastructure(builder.Configuration);
 
             var app = builder.Build();
