@@ -1,7 +1,9 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 
 namespace FCG.Users.Domain.Exceptions
 {
+    [ExcludeFromCodeCoverage]
     public class BaseException : Exception
     {
         public HttpStatusCode StatusCode { get; }

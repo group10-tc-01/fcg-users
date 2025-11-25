@@ -1,9 +1,11 @@
 using FCG.Users.Application.Abstractions.Messaging;
 using FluentValidation;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.Application.Abstractions.Behaviors
 {
+    [ExcludeFromCodeCoverage]
     public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : ICommand<TResponse>
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;

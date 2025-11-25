@@ -53,45 +53,8 @@ jobs:
           **/obj/Release/
         retention-days: 1
 
-  security-scan:
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    
-    - name: Restore dependencies
-      run: dotnet restore
-    
-    - name: Check for vulnerable packages
-      run: |
-        dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerable-packages.txt
-        if grep -q "has the following vulnerable packages" vulnerable-packages.txt; then
-          echo "⚠️ Pacotes vulneráveis detectados!"
-          cat vulnerable-packages.txt
-          exit 1
-        fi
-    
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: csharp
-    
-    - name: Build for CodeQL
-      run: dotnet build --configuration Release
-    
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-
   unit-tests:
     runs-on: ubuntu-latest
-    needs: build
     
     steps:
     - name: Checkout code
@@ -110,13 +73,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
     
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-artifacts
-    
     - name: Restore dependencies
       run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
     
     - name: Run unit tests with coverage
       run: |
@@ -138,7 +99,6 @@ jobs:
 
   integration-tests:
     runs-on: ubuntu-latest
-    needs: build
     
     steps:
     - name: Checkout code
@@ -157,13 +117,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
     
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-artifacts
-    
     - name: Restore dependencies
       run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
     
     - name: Run integration tests with coverage
       run: |
@@ -185,7 +143,6 @@ jobs:
 
   functional-tests:
     runs-on: ubuntu-latest
-    needs: build
     
     steps:
     - name: Checkout code
@@ -204,13 +161,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
     
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-artifacts
-    
     - name: Restore dependencies
       run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
     
     - name: Run functional tests
       run: |

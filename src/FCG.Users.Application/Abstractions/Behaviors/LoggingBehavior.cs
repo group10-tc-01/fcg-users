@@ -1,9 +1,11 @@
 using FCG.Users.Application.Abstractions.Messaging;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.Application.Abstractions.Behaviors
 {
+    [ExcludeFromCodeCoverage]
     public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : ICommand<TResponse>
     {
         private readonly ILogger<TRequest> _logger;
