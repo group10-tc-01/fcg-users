@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.6.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FCG.Users.Application\FCG.Users.Application.csproj" />
+    <ProjectReference Include="..\..\src\FCG.Users.Domain\FCG.Users.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
