@@ -6,8 +6,11 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
+  contents: read
   pull-requests: write
   issues: write
+  checks: write
+  statuses: write
 
 jobs:
   build:
