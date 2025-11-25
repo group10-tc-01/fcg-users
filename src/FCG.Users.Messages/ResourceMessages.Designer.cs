@@ -61,24 +61,6 @@ namespace FCG.Users.Messages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Balance cannot be negative..
-        /// </summary>
-        public static string BalanceCannotBeNegative {
-            get {
-                return ResourceManager.GetString("BalanceCannotBeNegative", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Category cannot be null or empty..
-        /// </summary>
-        public static string CategoryCannotBeNullOrEmpty {
-            get {
-                return ResourceManager.GetString("CategoryCannotBeNullOrEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Current password is incorrect..
         /// </summary>
         public static string CurrentPasswordIncorrect {
@@ -93,24 +75,6 @@ namespace FCG.Users.Messages {
         public static string CurrentPasswordRequired {
             get {
                 return ResourceManager.GetString("CurrentPasswordRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Description cannot be null or empty..
-        /// </summary>
-        public static string DescriptionCannotBeNullOrEmpty {
-            get {
-                return ResourceManager.GetString("DescriptionCannotBeNullOrEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Discount must be between 0 and 100..
-        /// </summary>
-        public static string DiscountMustBeBetweenZeroAndHundred {
-            get {
-                return ResourceManager.GetString("DiscountMustBeBetweenZeroAndHundred", resourceCulture);
             }
         }
         
@@ -138,87 +102,6 @@ namespace FCG.Users.Messages {
         public static string EmailCannotExceed255Characters {
             get {
                 return ResourceManager.GetString("EmailCannotExceed255Characters", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The game category type is invalid..
-        /// </summary>
-        public static string GameCategoryIsRequired {
-            get {
-                return ResourceManager.GetString("GameCategoryIsRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The game category must be less than 100 characters..
-        /// </summary>
-        public static string GameCategoryMaxLength {
-            get {
-                return ResourceManager.GetString("GameCategoryMaxLength", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The game description is required..
-        /// </summary>
-        public static string GameDescriptionIsRequired {
-            get {
-                return ResourceManager.GetString("GameDescriptionIsRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The game description must be less than 500 characters..
-        /// </summary>
-        public static string GameDescriptionMaxLength {
-            get {
-                return ResourceManager.GetString("GameDescriptionMaxLength", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The maximum price must be greater than or equal to the minimum price..
-        /// </summary>
-        public static string GameMaxPriceMustBeGreaterThanMinPrice {
-            get {
-                return ResourceManager.GetString("GameMaxPriceMustBeGreaterThanMinPrice", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The game with name {0} already exists..
-        /// </summary>
-        public static string GameNameAlreadyExists {
-            get {
-                return ResourceManager.GetString("GameNameAlreadyExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The game name is required..
-        /// </summary>
-        public static string GameNameIsRequired {
-            get {
-                return ResourceManager.GetString("GameNameIsRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The game name must be less than 255 characters..
-        /// </summary>
-        public static string GameNameMaxLength {
-            get {
-                return ResourceManager.GetString("GameNameMaxLength", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The game price must be greater than zero..
-        /// </summary>
-        public static string GamePriceMustBeGreaterThanZero {
-            get {
-                return ResourceManager.GetString("GamePriceMustBeGreaterThanZero", resourceCulture);
             }
         }
         
@@ -340,16 +223,7 @@ namespace FCG.Users.Messages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Name cannot exceed 100 characters.
-        /// </summary>
-        public static string NameIsLong {
-            get {
-                return ResourceManager.GetString("NameIsLong", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Name must be at least 2 characters long..
+        ///   Looks up a localized string similar to Name must be at least 3 characters long..
         /// </summary>
         public static string NameMinimumLength {
             get {
@@ -376,20 +250,20 @@ namespace FCG.Users.Messages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The password does not meet the strength requirements (minimum 8 characters, number, and special character)..
-        /// </summary>
-        public static string Password {
-            get {
-                return ResourceManager.GetString("Password", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Password cannot be null or empty..
         /// </summary>
         public static string PasswordCannotBeNullOrEmpty {
             get {
                 return ResourceManager.GetString("PasswordCannotBeNullOrEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password does not meet the strength requirements (minimum 8 characters, number, and special character)..
+        /// </summary>
+        public static string PasswordFormatNotValid {
+            get {
+                return ResourceManager.GetString("PasswordFormatNotValid", resourceCulture);
             }
         }
         
@@ -435,51 +309,6 @@ namespace FCG.Users.Messages {
         public static string PleaseContactSupport {
             get {
                 return ResourceManager.GetString("PleaseContactSupport", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The price cannot be a negative value..
-        /// </summary>
-        public static string PriceCannotBeNegative {
-            get {
-                return ResourceManager.GetString("PriceCannotBeNegative", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The price must be greater than zero..
-        /// </summary>
-        public static string PriceMustBeGreaterThanZero {
-            get {
-                return ResourceManager.GetString("PriceMustBeGreaterThanZero", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to End date must be on or after the start date..
-        /// </summary>
-        public static string PromotionEndDateMustBeAfterStartDate {
-            get {
-                return ResourceManager.GetString("PromotionEndDateMustBeAfterStartDate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to New refresh token generated..
-        /// </summary>
-        public static string RefreshTokenDefaultReason {
-            get {
-                return ResourceManager.GetString("RefreshTokenDefaultReason", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Stored hash value cannot be null or empty..
-        /// </summary>
-        public static string StoredHashCannotBeNullOrEmpty {
-            get {
-                return ResourceManager.GetString("StoredHashCannotBeNullOrEmpty", resourceCulture);
             }
         }
         

@@ -33,6 +33,8 @@ namespace FCG.Users.WebApi
                 app.ApplyMigrations();
             }
 
+            app.UseCustomerExceptionHandler();
+
             app.UseHttpsRedirection();
 
             app.MapControllers();

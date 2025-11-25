@@ -1,4 +1,5 @@
 ﻿using FCG.Users.Domain.Abstractions;
+using FCG.Users.Domain.Users;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -10,6 +11,8 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance
     public class FcgUserDbContext : DbContext, IUnitOfWork
     {
         private readonly IPublisher _publisher;
+
+        public DbSet<User> Users { get; set; }
 
         public FcgUserDbContext(DbContextOptions<FcgUserDbContext> options, IPublisher publisher) : base(options)
         {

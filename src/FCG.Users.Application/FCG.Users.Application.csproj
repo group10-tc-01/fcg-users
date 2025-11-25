@@ -17,4 +17,8 @@
     <ProjectReference Include="..\FCG.Users.Infrastructure.SqlServer\FCG.Users.Infrastructure.SqlServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Abstractions\Behaviors\" />
+  </ItemGroup>
+
 </Project>

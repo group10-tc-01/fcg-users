@@ -1,18 +1,14 @@
 ﻿using Bogus;
-using FCG.Users.Domain.Users;
+using FCG.Users.Application.UseCases.Users.Register;
 
 namespace FCG.Users.CommomTestsUtilities.Builders.Users
 {
-    public class UserBuilder
+    public class RegisterUserRequestBuilder
     {
-        public User Build()
+        public RegisterUserRequest Build()
         {
-            return new Faker<User>().CustomInstantiator(f => User.Create(f.Name.FullName(), f.Internet.Email(), GenerateValidPassword(f), f.PickRandom<Role>())).Generate();
-        }
-
-        public User BuildRegularUser()
-        {
-            return new Faker<User>().CustomInstantiator(f => User.Create(f.Name.FullName(), f.Internet.Email(), GenerateValidPassword(f), Role.User)).Generate();
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(f.Name.FullName(), f.Internet.Email(), GenerateValidPassword(f))).Generate();
         }
 
         private static string GenerateValidPassword(Faker faker)

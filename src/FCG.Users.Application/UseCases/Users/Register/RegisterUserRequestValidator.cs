@@ -2,7 +2,7 @@
 using FCG.Users.Messages;
 using FluentValidation;
 
-namespace FCG.Users.Application.UseCases.Users
+namespace FCG.Users.Application.UseCases.Users.Register
 {
     public class RegisterUserRequestValidator : AbstractValidator<RegisterUserRequest>
     {
@@ -11,8 +11,8 @@ namespace FCG.Users.Application.UseCases.Users
             RuleFor(x => x.Name)
                 .NotEmpty()
                 .WithMessage(ResourceMessages.NameRequired)
-                .MaximumLength(100)
-                .WithMessage(ResourceMessages.NameIsLong);
+                .MaximumLength(255)
+                .WithMessage(ResourceMessages.NameCannotExceed255Characters);
 
             RuleFor(x => x.Email)
                 .NotEmpty()
@@ -26,7 +26,7 @@ namespace FCG.Users.Application.UseCases.Users
                 .MaximumLength(100)
                 .WithMessage(ResourceMessages.LongPassword)
                 .Must(BeValidPassword)
-                .WithMessage(ResourceMessages.Password);
+                .WithMessage(ResourceMessages.PasswordFormatNotValid);
         }
 
         private static bool BeValidPassword(string password)

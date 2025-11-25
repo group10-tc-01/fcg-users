@@ -1,4 +1,4 @@
-﻿using FCG.Users.Application.UseCases.Users;
+﻿using FCG.Users.Application.UseCases.Users.Register;
 using FCG.Users.WebApi.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
