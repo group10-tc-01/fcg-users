@@ -273,8 +273,8 @@ jobs:
             -reports:"$coverage_files" \
             -targetdir:"./CoverageReports" \
             -reporttypes:"Cobertura;HtmlInline_AzurePipelines;JsonSummary" \
-            -filefilters:"-**/tests/**;-**/FCG.Users.UnitTests/**;-**/FCG.Users.IntegratedTests/**;-**/FCG.Users.FunctionalTests/**;-**/FCG.Users.CommomTestsUtilities/**" \
-            -classfilters:"-FCG.Users.UnitTests.*;-FCG.Users.IntegratedTests.*;-FCG.Users.FunctionalTests.*;-*.Tests.*;-*TestsUtilities.*" \
+            -filefilters:"-**/tests/**;-**/FCG.Users.UnitTests/**;-**/FCG.Users.IntegratedTests/**;-**/FCG.Users.FunctionalTests/**;-**/FCG.Users.CommomTestsUtilities/**;-**/FCG.Users.Messages/**;-**/Migrations/**" \
+            -classfilters:"-FCG.Users.UnitTests.*;-FCG.Users.IntegratedTests.*;-FCG.Users.FunctionalTests.*;-*.Tests.*;-*TestsUtilities.*;-FCG.Users.Messages.*;-*.Migrations.*" \
             -verbosity:Info
         fi
     
@@ -318,7 +318,7 @@ jobs:
       if: github.event_name == 'pull_request'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERAGE_THRESHOLD: 0
+        COVERAGE_THRESHOLD: 80
       run: |
         coverage_percent=${{ steps.coverage.outputs.coverage_percent }}
         branch_percent=${{ steps.coverage.outputs.branch_percent }}
@@ -389,8 +389,8 @@ jobs:
     
     - name: Check coverage threshold
       env:
-        COVERAGE_THRESHOLD: 0
-        COVERAGE_THRESHOLD_STRICT: false
+        COVERAGE_THRESHOLD: 80
+        COVERAGE_THRESHOLD_STRICT: true
       run: |
         coverage_percent=${{ steps.coverage.outputs.coverage_percent }}
         threshold=${COVERAGE_THRESHOLD:-0}
@@ -475,10 +475,10 @@ jobs:
           /d:sonar.token="$SONAR_TOKEN" \
           /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
           /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
-          /d:sonar.coverage.exclusions="**/tests/**,**/FCG.Users.UnitTests/**,**/FCG.Users.IntegratedTests/**,**/FCG.Users.FunctionalTests/**,**/FCG.Users.CommomTestsUtilities/**,**/Migrations/**,**/Program.cs" \
+          /d:sonar.coverage.exclusions="**/tests/**,**/FCG.Users.UnitTests/**,**/FCG.Users.IntegratedTests/**,**/FCG.Users.FunctionalTests/**,**/FCG.Users.CommomTestsUtilities/**,**/FCG.Users.Messages/**,**/Migrations/**,**/Program.cs" \
           /d:sonar.test.exclusions="**/tests/**,**/FCG.Users.UnitTests/**,**/FCG.Users.IntegratedTests/**,**/FCG.Users.FunctionalTests/**,**/FCG.Users.CommomTestsUtilities/**" \
-          /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**" \
-          /d:sonar.cpd.exclusions="**/Migrations/**,**/Program.cs"
+          /d:sonar.exclusions="**/Migrations/**,**/FCG.Users.Messages/**,**/obj/**,**/bin/**" \
+          /d:sonar.cpd.exclusions="**/Migrations/**,**/FCG.Users.Messages/**,**/Program.cs"
     
     - name: Restore dependencies
       run: dotnet restore
