@@ -1,4 +1,5 @@
 ﻿using FCG.Users.Domain.Exceptions;
+using FCG.Users.Messages;
 using System.Net.Mail;
 
 namespace FCG.Users.Domain.Users.ValueObjects
@@ -15,13 +16,13 @@ namespace FCG.Users.Domain.Users.ValueObjects
         public static Email Create(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new DomainException("Email cannot be null or empty.");
+                throw new DomainException(ResourceMessages.EmailCannotBeNullOrEmpty);
 
             if (value.Length > 255)
-                throw new DomainException("Email cannot exceed 255 characters.");
+                throw new DomainException(ResourceMessages.EmailCannotExceed255Characters);
 
             if (!IsValidEmail(value))
-                throw new DomainException("Invalid email format.");
+                throw new DomainException(ResourceMessages.InvalidEmailFormat);
 
             return new Email(value);
         }

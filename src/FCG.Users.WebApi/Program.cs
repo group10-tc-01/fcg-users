@@ -1,3 +1,7 @@
+using FCG.Users.Application.DependencyInjection;
+using FCG.Users.Infrastructure.SqlServer.DependencyInjection;
+using FCG.Users.WebApi.DependencyInjection;
+using FCG.Users.WebApi.Extensions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.WebApi
@@ -15,17 +19,21 @@ namespace FCG.Users.WebApi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddWebApi();
+            builder.Services.AddApplication();
+            builder.Services.AddInfrastructure(builder.Configuration);
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+
+                app.ApplyMigrations();
             }
 
             app.UseHttpsRedirection();
-
-            app.UseAuthorization();
 
             app.MapControllers();
 

@@ -1,5 +1,6 @@
 ﻿using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users.ValueObjects;
+using FCG.Users.Messages;
 using FluentAssertions;
 
 namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
@@ -28,7 +29,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Name.Create(shortName);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Name must be at least 2 characters long.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.NameMinimumLength);
         }
 
         [Fact]
@@ -39,7 +40,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Name.Create(nullName!);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Name cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.NameCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -50,7 +51,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Name.Create(emptyName);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Name cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.NameCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -61,7 +62,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Name.Create(whitespaceName);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Name cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.NameCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -74,7 +75,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Name.Create(longName!);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Name cannot exceed 255 characters.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.NameCannotExceed255Characters);
         }
 
         [Fact]

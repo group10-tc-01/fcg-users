@@ -1,4 +1,5 @@
 ﻿using FCG.Users.Domain.Exceptions;
+using FCG.Users.Messages;
 
 namespace FCG.Users.Domain.Users.ValueObjects
 {
@@ -14,13 +15,13 @@ namespace FCG.Users.Domain.Users.ValueObjects
         public static Name Create(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new DomainException("Name cannot be null or empty.");
+                throw new DomainException(ResourceMessages.NameCannotBeNullOrEmpty);
 
             if (value.Length < 2)
-                throw new DomainException("Name must be at least 2 characters long.");
+                throw new DomainException(ResourceMessages.NameMinimumLength);
 
             if (value.Length > 255)
-                throw new DomainException("Name cannot exceed 255 characters.");
+                throw new DomainException(ResourceMessages.NameCannotExceed255Characters);
 
             return new Name(value);
         }

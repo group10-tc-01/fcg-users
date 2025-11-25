@@ -11,6 +11,15 @@ namespace FCG.Users.Domain.Users
         public Password Password { get; private set; } = null!;
         public Role Role { get; private set; }
 
+        public static User Create(string name, string email, string password, Role role)
+        {
+            var user = new User(name, email, password, role);
+
+            user.RaiseDomainEvent(new UserCreatedDomainEvent(user.Id, user.Name, user.Email));
+
+            return user;
+        }
+
         private User(Name name, Email email, Password password, Role role) : base(Guid.NewGuid())
         {
             Name = name;
@@ -20,14 +29,5 @@ namespace FCG.Users.Domain.Users
         }
 
         private User() { }
-
-        public static User Create(string name, string email, string password, Role role)
-        {
-            var user = new User(name, email, password, role);
-
-            user.RaiseDomainEvent(new UserCreatedDomainEvent(user.Id, user.Name, user.Email));
-
-            return user;
-        }
     }
 }

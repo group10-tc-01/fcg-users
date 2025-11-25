@@ -1,5 +1,6 @@
 ﻿using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users.ValueObjects;
+using FCG.Users.Messages;
 using FluentAssertions;
 
 namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
@@ -28,7 +29,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
 
             Action act = () => Password.Create(nullPassword);
 
-            act.Should().Throw<DomainException>().WithMessage("Password cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.PasswordCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -38,7 +39,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
 
             Action act = () => Password.Create(emptyPassword);
 
-            act.Should().Throw<DomainException>().WithMessage("Password cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.PasswordCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -48,7 +49,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
 
             Action act = () => Password.Create(whitespacePassword);
 
-            act.Should().Throw<DomainException>().WithMessage("Password cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.PasswordCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -58,7 +59,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
 
             Action act = () => Password.Create(shortPassword);
 
-            act.Should().Throw<DomainException>().WithMessage("Password must be at least 8 characters long.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.PasswordMinimumLength);
         }
 
         [Fact]
@@ -68,7 +69,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
 
             Action act = () => Password.Create(passwordWithoutLetter);
 
-            act.Should().Throw<DomainException>().WithMessage("Password must contain at least one letter.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.PasswordMustContainLetter);
         }
 
         [Fact]
@@ -78,7 +79,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
 
             Action act = () => Password.Create(passwordWithoutDigit);
 
-            act.Should().Throw<DomainException>().WithMessage("Password must contain at least one digit.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.PasswordMustContainNumber);
         }
 
         [Fact]
@@ -88,7 +89,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
 
             Action act = () => Password.Create(passwordWithoutSpecial);
 
-            act.Should().Throw<DomainException>().WithMessage("Password must contain at least one special character.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.PasswordMustContainSpecialCharacter);
         }
 
         [Fact]
@@ -102,19 +103,6 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
 
             // Assert
             result.Should().Be("ToString123!");
-        }
-
-        [Fact]
-        public void Given_ValidHash_When_CreateFromHash_Then_ShouldCreatePassword()
-        {
-            // Arrange
-            var hash = "hashed_password_value";
-
-            // Act
-            var password = Password.CreateFromHash(hash);
-
-            // Assert
-            password.Value.Should().Be(hash);
         }
     }
 }

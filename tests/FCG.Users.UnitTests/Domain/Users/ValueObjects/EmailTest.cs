@@ -1,5 +1,6 @@
 ﻿using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users.ValueObjects;
+using FCG.Users.Messages;
 using FluentAssertions;
 
 namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
@@ -28,7 +29,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Email.Create(nullEmail!);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Email cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.EmailCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -39,7 +40,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Email.Create(emptyEmail);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Email cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.EmailCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -50,7 +51,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Email.Create(whitespaceEmail);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Email cannot be null or empty.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.EmailCannotBeNullOrEmpty);
         }
 
         [Fact]
@@ -61,7 +62,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Email.Create(longEmail);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Email cannot exceed 255 characters.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.EmailCannotExceed255Characters);
         }
 
         [Fact]
@@ -72,7 +73,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Email.Create(invalidEmail);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Invalid email format.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.InvalidEmailFormat);
         }
 
         [Fact]
@@ -83,7 +84,7 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             var act = () => Email.Create(emailWithoutAt);
 
             // Act & Assert
-            act.Should().Throw<DomainException>().WithMessage("Invalid email format.");
+            act.Should().Throw<DomainException>().WithMessage(ResourceMessages.InvalidEmailFormat);
         }
 
         [Fact]

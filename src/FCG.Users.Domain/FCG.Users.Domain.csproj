@@ -10,4 +10,8 @@
   	<PackageReference Include="MediatR.Contracts" Version="2.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FCG.Users.Messages\FCG.Users.Messages.csproj" />
+  </ItemGroup>
+
 </Project>
