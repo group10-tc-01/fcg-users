@@ -4,6 +4,7 @@ using FCG.Users.Infrastructure.Kafka.Configuration;
 using FCG.Users.Infrastructure.Kafka.Producer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -32,6 +33,7 @@ namespace FCG.Users.Infrastructure.Kafka.DependencyInjection
             services.AddSingleton<IKafkaProducer>(sp =>
             {
                 var settings = sp.GetRequiredService<KafkaSettings>();
+                var logger = sp.GetRequiredService<ILogger<KafkaProducer>>();
                 var producerConfig = new ProducerConfig
                 {
                     BootstrapServers = settings.BootstrapServers,
@@ -41,7 +43,7 @@ namespace FCG.Users.Infrastructure.Kafka.DependencyInjection
                     MessageSendMaxRetries = 3
                 };
 
-                return new KafkaProducer(producerConfig);
+                return new KafkaProducer(producerConfig, logger);
             });
 
             return services;
