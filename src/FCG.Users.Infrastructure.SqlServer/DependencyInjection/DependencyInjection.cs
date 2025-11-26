@@ -40,12 +40,20 @@ namespace FCG.Users.Infrastructure.SqlServer.DependencyInjection
 
         private static void AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)
         {
+            var seqUrl = configuration["Serilog:WriteTo:1:Args:serverUrl"] ?? configuration["Serilog:SeqUrl"] ?? "http://localhost:5341";
+
             Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
                 .Enrich.FromLogContext()
                 .Enrich.WithMachineName()
+                .Enrich.WithProperty("Application", "FCG.Users")
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
-                .WriteTo.Seq(configuration["Serilog:SeqUrl"] ?? "http://localhost:5341")
+                .WriteTo.Seq(seqUrl)
                 .CreateLogger();
+
+            Log.Information("Starting FCG.Users application");
+            Log.Information("Seq URL configured: {SeqUrl}", seqUrl);
+            Log.Information("Environment: {Environment}", configuration["ASPNETCORE_ENVIRONMENT"]);
 
             services.AddLogging(loggingBuilder =>
             {

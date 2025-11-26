@@ -21,5 +21,10 @@ namespace FCG.Users.WebApi.Extensions
         {
             app.UseMiddleware<GlobalExceptionMiddleware>();
         }
+
+        public static void UseGlobalCorrelationId(this IApplicationBuilder app)
+        {
+            app.UseMiddleware<GlobalCorrelationIdMiddleware>();
+        }
     }
 }
