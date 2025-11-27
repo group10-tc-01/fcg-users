@@ -6,9 +6,11 @@ namespace FCG.Users.IntegratedTests.Configurations
     public class FcgFixture : IClassFixture<CustomWebApplicationFactory>
     {
         protected readonly HttpClient _httpClient;
+        protected readonly CustomWebApplicationFactory Factory;
 
         public FcgFixture(CustomWebApplicationFactory factory)
         {
+            Factory = factory;
             _httpClient = factory.CreateClient();
         }
 
