@@ -1,7 +1,6 @@
-namespace FCG.Users.Infrastructure.Kafka.Abstractions
+namespace FCG.Users.Application.Abstractions.Messaging
 {
-
-    public interface IKafkaProducer
+    public interface IMessageProducer
     {
         Task ProduceAsync<T>(string topic, T message, CancellationToken cancellationToken = default) where T : class;
     }

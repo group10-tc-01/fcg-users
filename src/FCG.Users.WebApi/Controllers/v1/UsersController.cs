@@ -7,6 +7,7 @@ namespace FCG.Users.WebApi.Controllers.v1
 {
     public class UsersController(IMediator mediator) : FcgUserBaseController(mediator)
     {
+
         [HttpPost]
         [ProducesResponseType(typeof(ApiResponse<RegisterUserResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]

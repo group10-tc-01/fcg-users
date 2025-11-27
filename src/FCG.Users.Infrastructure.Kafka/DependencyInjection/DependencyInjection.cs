@@ -1,7 +1,7 @@
 using Confluent.Kafka;
-using FCG.Users.Infrastructure.Kafka.Abstractions;
-using FCG.Users.Infrastructure.Kafka.Configuration;
+using FCG.Users.Application.Abstractions.Messaging;
 using FCG.Users.Infrastructure.Kafka.Producer;
+using FCG.Users.Infrastructure.Kafka.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,15 +22,11 @@ namespace FCG.Users.Infrastructure.Kafka.DependencyInjection
                 config.RegisterServicesFromAssembly(assembly);
             });
 
-            var kafkaSettings = new KafkaSettings
-            {
-                BootstrapServers = configuration["Kafka:BootstrapServers"] ?? string.Empty,
-                UserCreatedTopic = configuration["Kafka:UserCreatedTopic"] ?? string.Empty
-            };
+            var kafkaSettings = configuration.GetSection("KafkaSettings").Get<KafkaSettings>();
 
-            services.AddSingleton(kafkaSettings);
+            services.AddSingleton(kafkaSettings!);
 
-            services.AddSingleton<IKafkaProducer>(sp =>
+            services.AddSingleton<IMessageProducer>(sp =>
             {
                 var settings = sp.GetRequiredService<KafkaSettings>();
                 var logger = sp.GetRequiredService<ILogger<KafkaProducer>>();

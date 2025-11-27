@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\FCG.Infrastructure.Users.Auth\FCG.Users.Infrastructure.Auth.csproj" />
     <ProjectReference Include="..\..\src\FCG.Users.Messages\FCG.Users.Messages.csproj" />
     <ProjectReference Include="..\FCG.Users.CommomTestsUtilities\FCG.Users.CommomTestsUtilities.csproj" />
   </ItemGroup>

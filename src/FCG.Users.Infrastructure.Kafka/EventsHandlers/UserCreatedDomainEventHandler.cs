@@ -1,7 +1,7 @@
-﻿using FCG.Users.Domain.Users.Events;
-using FCG.Users.Infrastructure.Kafka.Abstractions;
-using FCG.Users.Infrastructure.Kafka.Configuration;
+﻿using FCG.Users.Application.Abstractions.Messaging;
+using FCG.Users.Domain.Users.Events;
 using FCG.Users.Infrastructure.Kafka.Messages;
+using FCG.Users.Infrastructure.Kafka.Settings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -12,18 +12,18 @@ namespace FCG.Users.Infrastructure.Kafka.EventsHandlers
     [ExcludeFromCodeCoverage]
     public class UserCreatedDomainEventHandler : INotificationHandler<UserCreatedDomainEvent>
     {
-        private readonly IKafkaProducer _kafkaProducer;
+        private readonly IMessageProducer _messageProducer;
         private readonly KafkaSettings _kafkaSettings;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<UserCreatedDomainEventHandler> _logger;
 
         public UserCreatedDomainEventHandler(
-            IKafkaProducer kafkaProducer, 
-            KafkaSettings kafkaSettings, 
+            IMessageProducer kafkaProducer,
+            KafkaSettings kafkaSettings,
             IHttpContextAccessor httpContextAccessor,
             ILogger<UserCreatedDomainEventHandler> logger)
         {
-            _kafkaProducer = kafkaProducer;
+            _messageProducer = kafkaProducer;
             _kafkaSettings = kafkaSettings;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
@@ -52,7 +52,7 @@ namespace FCG.Users.Infrastructure.Kafka.EventsHandlers
 
             try
             {
-                await _kafkaProducer.ProduceAsync(_kafkaSettings.UserCreatedTopic, message, cancellationToken);
+                await _messageProducer.ProduceAsync(_kafkaSettings.UserCreatedTopic, message, cancellationToken);
 
                 _logger.LogInformation(
                     "Successfully completed UserCreatedDomainEvent processing for UserId {UserId} with CorrelationId {CorrelationId}",
@@ -70,7 +70,7 @@ namespace FCG.Users.Infrastructure.Kafka.EventsHandlers
         private Guid GetCorrelationId()
         {
             var httpContext = _httpContextAccessor.HttpContext;
-            
+
             if (httpContext?.Items.TryGetValue("CorrelationId", out var correlationIdObj) == true
                 && correlationIdObj is string correlationIdString
                 && Guid.TryParse(correlationIdString, out var correlationId))

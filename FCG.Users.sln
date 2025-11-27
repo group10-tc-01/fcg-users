@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCG.Users.Messages", "src\F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCG.Users.Infrastructure.Kafka", "src\FCG.Users.Infrastructure.Kafka\FCG.Users.Infrastructure.Kafka.csproj", "{B8122F6A-18C3-4B1A-81EA-3B1A2F093CBE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCG.Users.Infrastructure.Auth", "src\FCG.Infrastructure.Users.Auth\FCG.Users.Infrastructure.Auth.csproj", "{A8377CBB-9967-4589-8932-C6687ABAC8CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{B8122F6A-18C3-4B1A-81EA-3B1A2F093CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8122F6A-18C3-4B1A-81EA-3B1A2F093CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8122F6A-18C3-4B1A-81EA-3B1A2F093CBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8377CBB-9967-4589-8932-C6687ABAC8CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8377CBB-9967-4589-8932-C6687ABAC8CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8377CBB-9967-4589-8932-C6687ABAC8CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8377CBB-9967-4589-8932-C6687ABAC8CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +94,7 @@ Global
 		{6C8C0B87-BA1C-16CC-21C7-774C4A8C6F4E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{86EF9A64-28E0-40C8-B800-5581879D44AE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B8122F6A-18C3-4B1A-81EA-3B1A2F093CBE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A8377CBB-9967-4589-8932-C6687ABAC8CA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0F92508-E741-4C42-9919-C3BA2033C708}
