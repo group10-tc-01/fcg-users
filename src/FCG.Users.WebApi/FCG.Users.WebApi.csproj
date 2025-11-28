@@ -20,8 +20,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\FCG.Infrastructure.Users.Auth\FCG.Users.Infrastructure.Auth.csproj" />
 		<ProjectReference Include="..\FCG.Users.Application\FCG.Users.Application.csproj" />
+		<ProjectReference Include="..\FCG.Users.Infrastructure.Auth\FCG.Users.Infrastructure.Auth.csproj" />
 		<ProjectReference Include="..\FCG.Users.Infrastructure.Kafka\FCG.Users.Infrastructure.Kafka.csproj" />
 		<ProjectReference Include="..\FCG.Users.Infrastructure.SqlServer\FCG.Users.Infrastructure.SqlServer.csproj" />
 	</ItemGroup>
