@@ -19,6 +19,8 @@ namespace FCG.Users.Domain.RefreshTokens
             ExpiresAt = expiresAt;
         }
 
+        private RefreshToken() { }
+
         public static RefreshToken Create(string token, Guid userId, TimeSpan expiration)
         {
             return new RefreshToken(token, userId, DateTime.UtcNow.Add(expiration));

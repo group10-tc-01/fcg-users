@@ -11,13 +11,13 @@ namespace FCG.Users.FunctionalTests.Fixtures.Users
     {
         public RegisterUserUseCase RegisterUserUseCase { get; }
         public RegisterUserRequest RegisterUserRequest { get; }
-        public IPasswordEncrypter PasswordEncrypter { get; }
+        public IPasswordEncrypterService PasswordEncrypter { get; }
 
         public RegisterUserFixture()
         {
             var userRepository = new Mock<IUserRepository>().Object;
             var unitOfWork = new Mock<IUnitOfWork>().Object;
-            var passwordEncrypterMock = new Mock<IPasswordEncrypter>();
+            var passwordEncrypterMock = new Mock<IPasswordEncrypterService>();
 
             passwordEncrypterMock.Setup(x => x.Encrypt(It.IsAny<string>()))
                                 .Returns<string>(password => $"encrypted_{password}");

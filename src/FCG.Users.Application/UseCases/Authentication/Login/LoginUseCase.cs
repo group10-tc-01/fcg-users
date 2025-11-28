@@ -1,24 +1,33 @@
 ﻿using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Settings;
 using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace FCG.Users.Application.UseCases.Authentication.Login
 {
     public class LoginUseCase : ILoginUseCase
     {
-        private readonly IPasswordEncrypter _passwordEncrypter;
+        private readonly IPasswordEncrypterService _passwordEncrypter;
         private readonly ILogger<LoginUseCase> _logger;
         private readonly IAuthenticationService _authenticationService;
         private readonly IUserRepository _userRepository;
+        private readonly JwtSettings _jwtSettings;
 
-        public LoginUseCase(IUserRepository userRepository, IAuthenticationService authenticationService, ILogger<LoginUseCase> logger, IPasswordEncrypter passwordEncrypter)
+        public LoginUseCase(
+            IUserRepository userRepository,
+            IAuthenticationService authenticationService,
+            ILogger<LoginUseCase> logger,
+            IPasswordEncrypterService passwordEncrypter,
+            IOptions<JwtSettings> jwtSettings)
         {
             _userRepository = userRepository;
             _authenticationService = authenticationService;
             _logger = logger;
             _passwordEncrypter = passwordEncrypter;
+            _jwtSettings = jwtSettings.Value;
         }
 
         public async Task<LoginResponse> Handle(LoginRequest request, CancellationToken cancellationToken)
@@ -30,10 +39,11 @@ namespace FCG.Users.Application.UseCases.Authentication.Login
             ValidateUser(request, user);
 
             var accessToken = _authenticationService.GenerateAccessToken(user!);
+            var refreshToken = _authenticationService.GenerateRefreshToken();
 
             _logger.LogInformation("[LoginUseCase] Login successful for user: {UserId}", user!.Id);
 
-            return new LoginResponse(accessToken);
+            return new LoginResponse(accessToken, refreshToken, _jwtSettings.AccessTokenExpirationMinutes);
         }
 
         private void ValidateUser(LoginRequest request, User? user)

@@ -5,7 +5,7 @@ using static BCrypt.Net.BCrypt;
 namespace FCG.Users.Infrastructure.Auth.Authentication
 {
     [ExcludeFromCodeCoverage]
-    public class PasswordEncrypterService : IPasswordEncrypter
+    public class PasswordEncrypterService : IPasswordEncrypterService
     {
         public string Encrypt(string password)
         {

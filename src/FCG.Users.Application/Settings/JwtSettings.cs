@@ -1,4 +1,4 @@
-﻿namespace FCG.Users.Infrastructure.Auth.Settings
+﻿namespace FCG.Users.Application.Settings
 {
     public sealed class JwtSettings
     {

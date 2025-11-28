@@ -1,6 +1,6 @@
 ﻿using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Settings;
 using FCG.Users.Infrastructure.Auth.Authentication;
-using FCG.Users.Infrastructure.Auth.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,7 @@ namespace FCG.Users.Infrastructure.Auth.DependencyInjection
         public static IServiceCollection AddAuthInfrastruture(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAuthentication(configuration);
-            services.AddServices();
+            services.AddAuthenticationServices();
 
             return services;
         }
@@ -51,11 +51,15 @@ namespace FCG.Users.Infrastructure.Auth.DependencyInjection
 
         }
 
-        private static void AddServices(this IServiceCollection services)
+        private static void AddAuthenticationServices(this IServiceCollection services)
         {
             services.AddScoped<IAuthenticationService, AuthenticationService>();
 
-            services.AddScoped<IPasswordEncrypter, PasswordEncrypterService>();
+            services.AddScoped<IPasswordEncrypterService, PasswordEncrypterService>();
+
+            services.AddScoped<ITokenProviderService, TokenProviderService>();
+
+            services.AddScoped<ILoggedUserService, LoggedUserService>();
         }
     }
 }

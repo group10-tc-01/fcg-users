@@ -2,6 +2,7 @@
 using FCG.Users.Infrastructure.SqlServer.Persistance;
 using FCG.Users.WebApi.Filters;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.WebApi.DependencyInjection
@@ -9,13 +10,14 @@ namespace FCG.Users.WebApi.DependencyInjection
     [ExcludeFromCodeCoverage]
     public static class DependencyInjection
     {
-        public static IServiceCollection AddWebApi(this IServiceCollection services)
+        public static IServiceCollection AddWebApi(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddVersioning();
             services.AddFilters();
             services.AddHealthChecks().AddDbContextCheck<FcgUserDbContext>();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddSwaggerConfiguration();
+            services.AddSerilogLogging(configuration);
 
             return services;
         }
@@ -77,6 +79,30 @@ namespace FCG.Users.WebApi.DependencyInjection
             services.AddMvc(options =>
             {
                 options.Filters.Add<TrimStringsActionFilter>();
+            });
+        }
+
+        private static void AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)
+        {
+            var seqUrl = configuration["Serilog:WriteTo:1:Args:serverUrl"] ?? configuration["Serilog:SeqUrl"] ?? "http://localhost:5341";
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.FromLogContext()
+                .Enrich.WithMachineName()
+                .Enrich.WithProperty("Application", "FCG.Users")
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.Seq(seqUrl)
+                .CreateLogger();
+
+            Log.Information("Starting FCG.Users application");
+            Log.Information("Seq URL configured: {SeqUrl}", seqUrl);
+            Log.Information("Environment: {Environment}", configuration["ASPNETCORE_ENVIRONMENT"]);
+
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddSerilog();
             });
         }
     }

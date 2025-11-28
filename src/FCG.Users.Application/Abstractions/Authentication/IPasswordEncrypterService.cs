@@ -1,6 +1,6 @@
 ﻿namespace FCG.Users.Application.Abstractions.Authentication
 {
-    public interface IPasswordEncrypter
+    public interface IPasswordEncrypterService
     {
         string Encrypt(string password);
         bool IsValid(string password, string hashedPassword);

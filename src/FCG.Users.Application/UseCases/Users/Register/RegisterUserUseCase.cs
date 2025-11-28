@@ -10,9 +10,9 @@ namespace FCG.Users.Application.UseCases.Users.Register
     {
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IPasswordEncrypter _passwordEncrypter;
+        private readonly IPasswordEncrypterService _passwordEncrypter;
 
-        public RegisterUserUseCase(IUserRepository userRepository, IUnitOfWork unitOfWork, IPasswordEncrypter passwordEncrypter)
+        public RegisterUserUseCase(IUserRepository userRepository, IUnitOfWork unitOfWork, IPasswordEncrypterService passwordEncrypter)
         {
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;

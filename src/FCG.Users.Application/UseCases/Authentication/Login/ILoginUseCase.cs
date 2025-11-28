@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using FCG.Users.Application.Abstractions.Messaging;
 
 namespace FCG.Users.Application.UseCases.Authentication.Login
 {
-    public interface ILoginUseCase : IRequestHandler<LoginRequest, LoginResponse> { }
+    public interface ILoginUseCase : ICommandHandler<LoginRequest, LoginResponse> { }
 }

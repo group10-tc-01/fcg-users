@@ -22,6 +22,12 @@ namespace FCG.Users.Domain.Users
             return user;
         }
 
+        public void Update(string password)
+        {
+            Password = Password.Create(password);
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         private User(Name name, Email email, Password password, Role role) : base(Guid.NewGuid())
         {
             Name = name;

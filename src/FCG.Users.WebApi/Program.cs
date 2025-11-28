@@ -24,7 +24,7 @@ namespace FCG.Users.WebApi
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddWebApi();
+            builder.Services.AddWebApi(builder.Configuration);
             builder.Services.AddApplication();
             builder.Services.AddKafkaInfrastructure(builder.Configuration);
             builder.Services.AddInfrastructure(builder.Configuration);
