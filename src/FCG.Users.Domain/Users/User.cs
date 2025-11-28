@@ -24,7 +24,7 @@ namespace FCG.Users.Domain.Users
 
         public void Update(string password)
         {
-            Password = Password.Create(password);
+            Password = Password.CreateFromHash(password);
             UpdatedAt = DateTime.UtcNow;
         }
 

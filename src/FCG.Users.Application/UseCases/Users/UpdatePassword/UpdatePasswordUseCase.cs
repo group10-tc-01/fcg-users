@@ -39,7 +39,7 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
                 throw new DomainException(ResourceMessages.CurrentPasswordIncorrect);
             }
 
-            Password newPassword = Password.Create(request.NewPassword);
+            var newPassword = Password.Create(request.NewPassword);
 
             string hashedPassword = _passwordEncrypterService.Encrypt(newPassword.Value);
 

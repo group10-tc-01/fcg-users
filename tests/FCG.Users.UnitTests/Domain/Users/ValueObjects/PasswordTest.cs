@@ -104,5 +104,18 @@ namespace FCG.Users.UnitTests.Domain.Users.ValueObjects
             // Assert
             result.Should().Be("ToString123!");
         }
+
+        [Fact]
+        public void Given_ValidHash_When_CreateFromHash_Then_ShouldCreatePassword()
+        {
+            // Arrange
+            var hash = "hashed_password_value";
+
+            // Act
+            var password = Password.CreateFromHash(hash);
+
+            // Assert
+            password.Value.Should().Be(hash);
+        }
     }
 }

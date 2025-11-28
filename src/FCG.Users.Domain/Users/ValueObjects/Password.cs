@@ -32,6 +32,14 @@ namespace FCG.Users.Domain.Users.ValueObjects
             return new Password(value);
         }
 
+        public static Password CreateFromHash(string hashValue)
+        {
+            if (string.IsNullOrWhiteSpace(hashValue))
+                throw new ArgumentNullException(nameof(hashValue), ResourceMessages.PasswordCannotBeNullOrEmpty);
+
+            return new Password(hashValue);
+        }
+
         private static bool ContainsLetter(string password) => password.Any(char.IsLetter);
 
         private static bool ContainsDigit(string password) => password.Any(char.IsDigit);

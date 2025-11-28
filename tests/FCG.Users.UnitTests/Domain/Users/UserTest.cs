@@ -18,9 +18,11 @@ namespace FCG.Users.UnitTests.Domain.Users
 
             // Assert
             user.Should().NotBeNull();
+            user.Id.Should().NotBe(Guid.Empty);
             user.Name.Should().Be(userBuilder.Name);
             user.Email.Should().Be(userBuilder.Email);
-            user.Id.Should().NotBe(Guid.Empty);
+            user.Role.Should().Be(Role.User);
+            user.RefreshTokens.Should().BeNullOrEmpty();
             user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
             user.UpdatedAt.TimeOfDay.Should().Be(TimeSpan.Zero);
             user.IsActive.Should().BeTrue();
@@ -108,6 +110,22 @@ namespace FCG.Users.UnitTests.Domain.Users
             // Assert
             domainEvents.Should().NotBeNull();
             domainEvents.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Given_ValidUserParameters_When_Update_Then_ShouldReturnOk()
+        {
+            // Arrange
+            var userBuilder = new UserBuilder().Build();
+            var newPassword = "ValidP@ssw0rd123!";
+
+            // Act
+            var user = User.CreateRegularUser(userBuilder.Name, userBuilder.Email, userBuilder.Password);
+            user.Update(newPassword);
+
+            // Assert
+            user.Password.Value.Should().Be(newPassword);
+            user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
         }
     }
 }

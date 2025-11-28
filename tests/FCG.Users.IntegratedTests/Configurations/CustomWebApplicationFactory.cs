@@ -1,4 +1,6 @@
-﻿using FCG.Users.CommomTestsUtilities.Builders.Users;
+﻿using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.CommomTestsUtilities.Builders.Authentication;
+using FCG.Users.CommomTestsUtilities.Builders.Users;
 using FCG.Users.Domain.Users;
 using FCG.Users.Infrastructure.SqlServer.Persistance;
 using FCG.Users.WebApi;
@@ -24,6 +26,8 @@ namespace FCG.Users.IntegratedTests.Configurations
             builder.UseEnvironment("Test").ConfigureServices(services =>
             {
                 RemoveEntityFrameworkServices(services);
+                RemoveKafkaServices(services);
+                RemovePasswordEncrypterService(services);
 
                 _connection?.Dispose();
                 _connection = new SqliteConnection("Data Source=:memory:");
@@ -53,7 +57,18 @@ namespace FCG.Users.IntegratedTests.Configurations
                 services.Remove(descriptor);
             }
 
-            RemoveKafkaServices(services);
+        }
+
+        private static void RemovePasswordEncrypterService(IServiceCollection services)
+        {
+            var passwordEncrypterService = services.Where(service => service.ServiceType == typeof(IPasswordEncrypterService));
+
+            if (passwordEncrypterService.Any())
+            {
+                services.Remove(passwordEncrypterService.First());
+            }
+
+            services.AddScoped<IPasswordEncrypterService>(_ => PasswordEncrypterServiceBuilder.Build());
         }
 
         private static void RemoveKafkaServices(IServiceCollection services)
