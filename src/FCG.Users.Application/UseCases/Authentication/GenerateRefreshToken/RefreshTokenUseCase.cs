@@ -6,7 +6,7 @@ using FCG.Users.Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace FCG.Users.Application.UseCases.Authentication.RefreshToken
+namespace FCG.Users.Application.UseCases.Authentication.GenerateRefreshToken
 {
     public class RefreshTokenUseCase : IRefreshTokenUseCase
     {
@@ -39,7 +39,7 @@ namespace FCG.Users.Application.UseCases.Authentication.RefreshToken
                 throw new UnauthorizedException(ResourceMessages.InvalidRefreshToken);
             }
 
-            var user = await _userRepository.GetByIdAsync(Guid.Parse(userId));
+            var user = await _userRepository.GetByIdAsync(Guid.Parse(userId), cancellationToken);
 
             if (user is null)
             {
@@ -52,11 +52,11 @@ namespace FCG.Users.Application.UseCases.Authentication.RefreshToken
 
             var accessToken = _authenticationService.GenerateAccessToken(user);
             var newRefreshTokenValue = _authenticationService.GenerateRefreshToken();
-            var newRefreshToken = await _authenticationService.CreateRefreshTokenAsync(newRefreshTokenValue, user.Id);
+            await _authenticationService.CreateRefreshTokenAsync(newRefreshTokenValue, user.Id);
 
             _logger.LogInformation("[RefreshTokenUseCase] Successfully refreshed token for user: {UserId}", user.Id);
 
-            return new RefreshTokenResponse(accessToken, newRefreshToken.Token, _jwtSettings.RefreshTokenExpirationDays);
+            return new RefreshTokenResponse(accessToken, newRefreshTokenValue, _jwtSettings.RefreshTokenExpirationDays);
         }
     }
 }

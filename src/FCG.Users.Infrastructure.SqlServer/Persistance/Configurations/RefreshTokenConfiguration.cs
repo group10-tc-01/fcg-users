@@ -12,6 +12,8 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Configurations
         {
             base.Configure(builder);
 
+            builder.ToTable("RefreshToken");
+
             builder.Property(rt => rt.Token)
                    .IsRequired()
                    .HasMaxLength(500);

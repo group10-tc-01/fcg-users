@@ -1,7 +1,6 @@
 ﻿using FCG.Users.Application.Abstractions.Authentication;
 using FCG.Users.Domain.Abstractions;
 using FCG.Users.Domain.Exceptions;
-using FCG.Users.Domain.Users;
 using FCG.Users.Domain.Users.ValueObjects;
 using FCG.Users.Messages;
 using Microsoft.Extensions.Logging;
@@ -10,20 +9,17 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
 {
     public class UpdatePasswordUseCase : IUpdateUserUseCase
     {
-        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordEncrypterService _passwordEncrypterService;
         private readonly ILogger<UpdatePasswordUseCase> _logger;
         private readonly ILoggedUserService _loggedUser;
 
         public UpdatePasswordUseCase(
-            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             IPasswordEncrypterService passwordEncrypterService,
             ILogger<UpdatePasswordUseCase> logger,
             ILoggedUserService loggedUser)
         {
-            _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _passwordEncrypterService = passwordEncrypterService;
             _logger = logger;

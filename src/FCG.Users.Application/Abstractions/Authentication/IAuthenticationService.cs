@@ -1,5 +1,4 @@
-﻿using FCG.Users.Domain.RefreshTokens;
-using FCG.Users.Domain.Users;
+﻿using FCG.Users.Domain.Users;
 
 namespace FCG.Users.Application.Abstractions.Authentication
 {
@@ -7,7 +6,7 @@ namespace FCG.Users.Application.Abstractions.Authentication
     {
         string GenerateAccessToken(User user);
         string GenerateRefreshToken();
-        Task<RefreshToken> CreateRefreshTokenAsync(string token, Guid userId);
+        Task CreateRefreshTokenAsync(string token, Guid userId);
         Task<string?> ValidateRefreshTokenAsync(string refreshToken);
         Task RevokeRefreshTokenAsync(string refreshToken);
     }

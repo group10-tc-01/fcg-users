@@ -59,13 +59,11 @@ namespace FCG.Users.Infrastructure.Auth.Authentication
             return Convert.ToBase64String(randomBytes);
         }
 
-        public async Task<RefreshToken> CreateRefreshTokenAsync(string token, Guid userId)
+        public async Task CreateRefreshTokenAsync(string token, Guid userId)
         {
             var refreshToken = RefreshToken.Create(token, userId, TimeSpan.FromDays(_jwtSettings.RefreshTokenExpirationDays));
             await _refreshTokenRepository.AddAsync(refreshToken);
             await _unitOfWork.SaveChangesAsync();
-
-            return refreshToken;
         }
 
         public async Task<string?> ValidateRefreshTokenAsync(string refreshToken)

@@ -12,7 +12,7 @@ namespace FCG.Users.Domain.RefreshTokens
 
         public User? User { get; }
 
-        private RefreshToken(string token, Guid userId, DateTime expiresAt)
+        private RefreshToken(string token, Guid userId, DateTime expiresAt) : base(Guid.NewGuid())
         {
             Token = token;
             UserId = userId;

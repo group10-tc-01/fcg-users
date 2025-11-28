@@ -102,7 +102,7 @@ namespace FCG.Users.IntegratedTests.Configurations
                 users.Add(user);
             }
 
-            context.Users.AddRange(users);
+            context.User.AddRange(users);
             context.SaveChanges();
             Log.Information("Created {Count} regular users", users.Count);
 

@@ -14,17 +14,17 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Repositories
 
         public async Task AddAsync(User user)
         {
-            await _fcgUserDbContext.Users.AddAsync(user);
+            await _fcgUserDbContext.User.AddAsync(user);
         }
 
         public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
         {
-            return await _fcgUserDbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email.Value == email, cancellationToken);
+            return await _fcgUserDbContext.User.AsNoTracking().FirstOrDefaultAsync(u => u.Email.Value == email, cancellationToken);
         }
 
         public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var user = await _fcgUserDbContext.Users.FirstOrDefaultAsync(u => u.IsActive && u.Id == id, cancellationToken);
+            var user = await _fcgUserDbContext.User.FirstOrDefaultAsync(u => u.IsActive && u.Id == id, cancellationToken);
 
             return user;
         }

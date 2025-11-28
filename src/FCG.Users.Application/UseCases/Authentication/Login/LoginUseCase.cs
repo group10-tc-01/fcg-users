@@ -40,6 +40,7 @@ namespace FCG.Users.Application.UseCases.Authentication.Login
 
             var accessToken = _authenticationService.GenerateAccessToken(user!);
             var refreshToken = _authenticationService.GenerateRefreshToken();
+            await _authenticationService.CreateRefreshTokenAsync(refreshToken, user!.Id);
 
             _logger.LogInformation("[LoginUseCase] Login successful for user: {UserId}", user!.Id);
 
