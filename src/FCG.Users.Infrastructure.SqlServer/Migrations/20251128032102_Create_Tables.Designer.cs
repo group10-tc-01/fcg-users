@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FCG.Users.Infrastructure.SqlServer.Migrations
 {
     [DbContext(typeof(FcgUserDbContext))]
-    [Migration("20251127202953_Add_RefreshToken")]
-    partial class Add_RefreshToken
+    [Migration("20251128032102_Create_Tables")]
+    partial class Create_Tables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,7 +64,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshToken");
+                    b.ToTable("RefreshToken", (string)null);
                 });
 
             modelBuilder.Entity("FCG.Users.Domain.Users.User", b =>
@@ -93,7 +93,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("FCG.Users.Domain.RefreshTokens.RefreshToken", b =>
@@ -125,7 +125,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
                             b1.HasIndex("Value")
                                 .IsUnique();
 
-                            b1.ToTable("Users");
+                            b1.ToTable("User");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -144,7 +144,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("Users");
+                            b1.ToTable("User");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -163,7 +163,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("Users");
+                            b1.ToTable("User");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
