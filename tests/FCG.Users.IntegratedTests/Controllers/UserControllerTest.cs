@@ -43,7 +43,7 @@ namespace FCG.Users.IntegratedTests.Controllers
         {
             // Arrange
             var user = Factory.CreatedUsers.First();
-            var request = new UpdatePasswordRequestBuilder().Build(user.Password);
+            var request = new UpdatePasswordRequestBuilder().Build();
             var userToken = GenerateToken(user.Id, user.Role.ToString());
             PasswordEncrypterServiceBuilder.SetupIsValid(true);
             PasswordEncrypterServiceBuilder.SetupEncrypt();

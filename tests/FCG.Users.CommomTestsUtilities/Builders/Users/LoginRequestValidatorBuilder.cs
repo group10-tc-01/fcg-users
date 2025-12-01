@@ -10,11 +10,5 @@ namespace FCG.Users.CommomTestsUtilities.Builders.Users
         {
             return new Faker<LoginRequest>().CustomInstantiator(f => new LoginRequest(f.Internet.Email(), PasswordGenerator.GenerateValidPassword(f))).Generate();
         }
-
-        public LoginRequest BuildWithCustomValues(string email, string password)
-        {
-            return new Faker<LoginRequest>()
-                       .CustomInstantiator(f => new LoginRequest(email, password)).Generate();
-        }
     }
 }
