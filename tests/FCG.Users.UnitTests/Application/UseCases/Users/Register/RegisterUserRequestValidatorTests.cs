@@ -36,7 +36,7 @@ namespace FCG.Users.UnitTests.Application.UseCases.Users.Register
         public void Given_InvalidName_When_Validate_Then_ShouldFailValidation(string? name)
         {
             // Arrange
-            var input = _builder.BuildWithValues(name!, "test@example.com", "Password@123");
+            var input = _builder.BuildWithCustomValues(name!, "test@example.com", "Password@123");
 
             // Act
             var result = _validator.Validate(input);
@@ -53,7 +53,7 @@ namespace FCG.Users.UnitTests.Application.UseCases.Users.Register
         public void Given_InvalidEmail_When_Validate_Then_ShouldFailValidation(string email)
         {
             // Arrange
-            var input = _builder.BuildWithValues("Test User", email, "Password@123");
+            var input = _builder.BuildWithCustomValues("Test User", email, "Password@123");
 
             // Act
             var result = _validator.Validate(input);
@@ -71,7 +71,7 @@ namespace FCG.Users.UnitTests.Application.UseCases.Users.Register
         public void Given_InvalidPassword_When_Validate_Then_ShouldFailValidation(string password)
         {
             // Arrange
-            var input = _builder.BuildWithValues("Test User", "test@example.com", password);
+            var input = _builder.BuildWithCustomValues("Test User", "test@example.com", password);
 
             // Act
             var result = _validator.Validate(input);

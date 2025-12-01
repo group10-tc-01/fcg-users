@@ -14,33 +14,6 @@ namespace FCG.Users.CommomTestsUtilities.Builders.Authentication
                 .Generate();
         }
 
-        public LoginRequest BuildWithEmptyEmail()
-        {
-            return new Faker<LoginRequest>()
-                .CustomInstantiator(faker => new LoginRequest(
-                    string.Empty,
-                    faker.Internet.Password()))
-                .Generate();
-        }
-
-        public LoginRequest BuildWithInvalidEmail()
-        {
-            return new Faker<LoginRequest>()
-                .CustomInstantiator(faker => new LoginRequest(
-                    faker.Lorem.Word(),
-                    faker.Internet.Password()))
-                .Generate();
-        }
-
-        public LoginRequest BuildWithEmptyPassword()
-        {
-            return new Faker<LoginRequest>()
-                .CustomInstantiator(faker => new LoginRequest(
-                    faker.Internet.Email(),
-                    string.Empty))
-                .Generate();
-        }
-
         public LoginRequest BuildWithValues(string email, string password)
         {
             return new Faker<LoginRequest>()

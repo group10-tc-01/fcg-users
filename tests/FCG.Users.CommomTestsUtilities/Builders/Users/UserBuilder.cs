@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using FCG.Users.CommomTestsUtilities.Helpers;
 using FCG.Users.Domain.Users;
 
 namespace FCG.Users.CommomTestsUtilities.Builders.Users
@@ -7,26 +8,7 @@ namespace FCG.Users.CommomTestsUtilities.Builders.Users
     {
         public User Build()
         {
-            return new Faker<User>().CustomInstantiator(f => User.CreateRegularUser(f.Name.FullName(), f.Internet.Email(), GenerateValidPassword(f))).Generate();
-        }
-
-        private static string GenerateValidPassword(Faker faker)
-        {
-            var letter = faker.Random.Char('a', 'z');
-            var digit = faker.Random.Char('0', '9');
-            var special = faker.PickRandom('!', '@', '#', '$', '%', '^', '&', '*');
-
-            var additionalChars = faker.Random.String2(5, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*");
-
-            var passwordChars = new[] { letter, digit, special }.Concat(additionalChars.ToCharArray()).ToArray();
-
-            for (int i = passwordChars.Length - 1; i > 0; i--)
-            {
-                int j = faker.Random.Int(0, i);
-                (passwordChars[i], passwordChars[j]) = (passwordChars[j], passwordChars[i]);
-            }
-
-            return new string(passwordChars);
+            return new Faker<User>().CustomInstantiator(f => User.CreateRegularUser(f.Name.FullName(), f.Internet.Email(), PasswordGenerator.GenerateValidPassword(f))).Generate();
         }
     }
 }
