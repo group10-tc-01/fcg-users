@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace FCG.Users.Infrastructure.Auth.Authentication
 {
-    internal class TokenProviderService : ITokenProviderService
+    public class TokenProviderService : ITokenProviderService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 

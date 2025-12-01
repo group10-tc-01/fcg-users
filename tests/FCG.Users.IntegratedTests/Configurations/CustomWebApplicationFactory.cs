@@ -1,6 +1,8 @@
 ﻿using FCG.Users.Application.Abstractions.Authentication;
 using FCG.Users.CommomTestsUtilities.Builders.Authentication;
+using FCG.Users.CommomTestsUtilities.Builders.RefreshTokens;
 using FCG.Users.CommomTestsUtilities.Builders.Users;
+using FCG.Users.Domain.RefreshTokens;
 using FCG.Users.Domain.Users;
 using FCG.Users.Infrastructure.SqlServer.Persistance;
 using FCG.Users.WebApi;
@@ -20,6 +22,7 @@ namespace FCG.Users.IntegratedTests.Configurations
     {
         private DbConnection? _connection;
         public List<User> CreatedUsers { get; private set; } = [];
+        public List<RefreshToken> CreatedRefreshTokens { get; private set; } = [];
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -105,6 +108,7 @@ namespace FCG.Users.IntegratedTests.Configurations
             Log.Information($"Creating {itemsQuantity} items for integrated test");
 
             CreatedUsers = CreateUser(context, itemsQuantity);
+            CreatedRefreshTokens = CreateRefreshTokens(context, CreatedUsers.ToList());
         }
 
         private List<User> CreateUser(FcgUserDbContext context, int itemsQuantity)
@@ -122,6 +126,23 @@ namespace FCG.Users.IntegratedTests.Configurations
             Log.Information("Created {Count} regular users", users.Count);
 
             return users;
+        }
+
+        public List<RefreshToken> CreateRefreshTokens(FcgUserDbContext context, List<User> users)
+        {
+            var refreshTokens = new List<RefreshToken>();
+
+            foreach (var user in users)
+            {
+                var refreshToken = new RefreshTokenBuilder().BuildWithUserId(user.Id);
+                refreshTokens.Add(refreshToken);
+            }
+
+            context.RefreshToken.AddRange(refreshTokens);
+            context.SaveChanges();
+            Log.Information("Created {Count} refresh tokens", refreshTokens.Count);
+            CreatedRefreshTokens = refreshTokens;
+            return refreshTokens;
         }
 
         protected override void Dispose(bool disposing)

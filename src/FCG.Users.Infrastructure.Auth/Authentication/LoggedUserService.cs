@@ -1,11 +1,9 @@
 ﻿using FCG.Users.Application.Abstractions.Authentication;
 using FCG.Users.Domain.Users;
-using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace FCG.Users.Infrastructure.Auth.Authentication
 {
-    [ExcludeFromCodeCoverage]
     public class LoggedUserService : ILoggedUserService
     {
         private readonly IUserRepository _userRepository;

@@ -32,6 +32,14 @@ namespace FCG.Users.IntegratedTests.Configurations
             return await _httpClient.PostAsync(url, stringContent);
         }
 
+        protected async Task<HttpResponseMessage> DoAuthenticatedPost<T>(string url, T content, string jwtToken)
+        {
+            SetAuthenticationHeader(jwtToken);
+            var json = JsonSerializer.Serialize(content);
+            var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+            return await _httpClient.PostAsync(url, stringContent);
+        }
+
         protected async Task<HttpResponseMessage> DoAuthenticatedPatch<T>(string url, T content, string jwtToken)
         {
             SetAuthenticationHeader(jwtToken);

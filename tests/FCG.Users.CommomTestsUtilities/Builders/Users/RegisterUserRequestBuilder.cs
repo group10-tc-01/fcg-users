@@ -11,6 +11,60 @@ namespace FCG.Users.CommomTestsUtilities.Builders.Users
                        .CustomInstantiator(f => new RegisterUserRequest(f.Name.FullName(), f.Internet.Email(), GenerateValidPassword(f))).Generate();
         }
 
+        public RegisterUserRequest BuildWithEmptyName()
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(string.Empty, f.Internet.Email(), GenerateValidPassword(f))).Generate();
+        }
+
+        public RegisterUserRequest BuildWithNullName()
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(null!, f.Internet.Email(), GenerateValidPassword(f))).Generate();
+        }
+
+        public RegisterUserRequest BuildWithWhitespaceName()
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest("   ", f.Internet.Email(), GenerateValidPassword(f))).Generate();
+        }
+
+        public RegisterUserRequest BuildWithInvalidEmail()
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(f.Name.FullName(), f.Lorem.Word(), GenerateValidPassword(f))).Generate();
+        }
+
+        public RegisterUserRequest BuildWithShortPassword()
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(f.Name.FullName(), f.Internet.Email(), "short")).Generate();
+        }
+
+        public RegisterUserRequest BuildWithPasswordWithoutUppercase()
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(f.Name.FullName(), f.Internet.Email(), "password123")).Generate();
+        }
+
+        public RegisterUserRequest BuildWithPasswordWithoutLowercase()
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(f.Name.FullName(), f.Internet.Email(), "PASSWORD123")).Generate();
+        }
+
+        public RegisterUserRequest BuildWithPasswordWithoutSpecialChar()
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(f.Name.FullName(), f.Internet.Email(), "password")).Generate();
+        }
+
+        public RegisterUserRequest BuildWithValues(string name, string email, string password)
+        {
+            return new Faker<RegisterUserRequest>()
+                       .CustomInstantiator(f => new RegisterUserRequest(name, email, password)).Generate();
+        }
+
         private static string GenerateValidPassword(Faker faker)
         {
             var letter = faker.Random.Char('a', 'z');
