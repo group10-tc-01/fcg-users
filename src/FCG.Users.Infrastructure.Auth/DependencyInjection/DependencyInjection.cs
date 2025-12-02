@@ -1,0 +1,65 @@
+﻿using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Settings;
+using FCG.Users.Infrastructure.Auth.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
+
+namespace FCG.Users.Infrastructure.Auth.DependencyInjection
+{
+    [ExcludeFromCodeCoverage]
+    public static class DependencyInjection
+    {
+        public static IServiceCollection AddAuthInfrastruture(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddAuthentication(configuration);
+            services.AddAuthenticationServices();
+
+            return services;
+        }
+
+        private static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
+            var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+            var key = Encoding.ASCII.GetBytes(jwtSettings!.SecretKey);
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+        }
+
+        private static void AddAuthenticationServices(this IServiceCollection services)
+        {
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+            services.AddScoped<IPasswordEncrypterService, PasswordEncrypterService>();
+
+            services.AddScoped<ITokenProviderService, TokenProviderService>();
+
+            services.AddScoped<ILoggedUserService, LoggedUserService>();
+        }
+    }
+}

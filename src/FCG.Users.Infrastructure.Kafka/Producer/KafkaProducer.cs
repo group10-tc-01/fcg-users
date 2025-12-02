@@ -1,5 +1,5 @@
 using Confluent.Kafka;
-using FCG.Users.Infrastructure.Kafka.Abstractions;
+using FCG.Users.Application.Abstractions.Messaging;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace FCG.Users.Infrastructure.Kafka.Producer
 {
     [ExcludeFromCodeCoverage]
-    public class KafkaProducer : IKafkaProducer, IDisposable
+    public class KafkaProducer : IMessageProducer, IDisposable
     {
         private readonly IProducer<string, string> _producer;
         private readonly ILogger<KafkaProducer> _logger;

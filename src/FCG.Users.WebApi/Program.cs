@@ -1,8 +1,11 @@
 using FCG.Users.Application.DependencyInjection;
+using FCG.Users.Infrastructure.Auth.DependencyInjection;
 using FCG.Users.Infrastructure.Kafka.DependencyInjection;
 using FCG.Users.Infrastructure.SqlServer.DependencyInjection;
 using FCG.Users.WebApi.DependencyInjection;
 using FCG.Users.WebApi.Extensions;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.WebApi
@@ -21,10 +24,11 @@ namespace FCG.Users.WebApi
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddWebApi();
+            builder.Services.AddWebApi(builder.Configuration);
             builder.Services.AddApplication();
             builder.Services.AddKafkaInfrastructure(builder.Configuration);
             builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddAuthInfrastruture(builder.Configuration);
 
             var app = builder.Build();
 
@@ -42,10 +46,24 @@ namespace FCG.Users.WebApi
             app.UseSwaggerUI();
 
             app.UseCustomerExceptionHandler();
-
             app.UseGlobalCorrelationId();
 
+            app.MapHealthChecks("/health", new HealthCheckOptions
+            {
+                AllowCachingResponses = false,
+                ResultStatusCodes =
+                {
+                    [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                    [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable,
+                }
+
+            });
+
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
+
+            app.UseAuthorization();
 
             app.MapControllers();
 

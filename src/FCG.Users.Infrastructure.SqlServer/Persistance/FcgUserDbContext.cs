@@ -1,4 +1,5 @@
 ﻿using FCG.Users.Domain.Abstractions;
+using FCG.Users.Domain.RefreshTokens;
 using FCG.Users.Domain.Users;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,8 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance
     {
         private readonly IPublisher _publisher;
 
-        public DbSet<User> Users { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<RefreshToken> RefreshToken { get; set; }
 
         public FcgUserDbContext(DbContextOptions<FcgUserDbContext> options, IPublisher publisher) : base(options)
         {

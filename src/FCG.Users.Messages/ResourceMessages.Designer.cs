@@ -313,6 +313,15 @@ namespace FCG.Users.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New refresh token generated..
+        /// </summary>
+        public static string RefreshTokenDefaultReason {
+            get {
+                return ResourceManager.GetString("RefreshTokenDefaultReason", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An unexpected error occurred!.
         /// </summary>
         public static string UnexpectedErrorOccurred {

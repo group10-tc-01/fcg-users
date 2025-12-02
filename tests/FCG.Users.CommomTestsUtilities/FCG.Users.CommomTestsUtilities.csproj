@@ -1,18 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Bogus" Version="35.6.5" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Bogus" Version="35.6.5" />
+		<PackageReference Include="Moq" Version="4.20.72" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.11" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\FCG.Users.Application\FCG.Users.Application.csproj" />
-    <ProjectReference Include="..\..\src\FCG.Users.Domain\FCG.Users.Domain.csproj" />
-  </ItemGroup>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\FCG.Users.Application\FCG.Users.Application.csproj" />
+		<ProjectReference Include="..\..\src\FCG.Users.Domain\FCG.Users.Domain.csproj" />
+		<ProjectReference Include="..\..\src\FCG.Users.Infrastructure.Auth\FCG.Users.Infrastructure.Auth.csproj" />
+		<ProjectReference Include="..\..\src\FCG.Users.Infrastructure.Kafka\FCG.Users.Infrastructure.Kafka.csproj" />
+		<ProjectReference Include="..\..\src\FCG.Users.Infrastructure.SqlServer\FCG.Users.Infrastructure.SqlServer.csproj" />
+	</ItemGroup>
 
 </Project>

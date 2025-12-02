@@ -219,4 +219,7 @@
   <data name="UnexpectedErrorOccurred" xml:space="preserve">
     <value>An unexpected error occurred!</value>
   </data>
+  <data name="RefreshTokenDefaultReason" xml:space="preserve">
+    <value>New refresh token generated.</value>
+  </data>
 </root>

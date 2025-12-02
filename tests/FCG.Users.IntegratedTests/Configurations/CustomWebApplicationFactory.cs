@@ -1,4 +1,8 @@
-﻿using FCG.Users.CommomTestsUtilities.Builders.Users;
+﻿using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.CommomTestsUtilities.Builders.Authentication;
+using FCG.Users.CommomTestsUtilities.Builders.RefreshTokens;
+using FCG.Users.CommomTestsUtilities.Builders.Users;
+using FCG.Users.Domain.RefreshTokens;
 using FCG.Users.Domain.Users;
 using FCG.Users.Infrastructure.SqlServer.Persistance;
 using FCG.Users.WebApi;
@@ -18,12 +22,16 @@ namespace FCG.Users.IntegratedTests.Configurations
     {
         private DbConnection? _connection;
         public List<User> CreatedUsers { get; private set; } = [];
+        public User CreatedAdminUser { get; private set; } = null!;
+        public List<RefreshToken> CreatedRefreshTokens { get; private set; } = [];
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Test").ConfigureServices(services =>
             {
                 RemoveEntityFrameworkServices(services);
+                RemoveKafkaServices(services);
+                RemovePasswordEncrypterService(services);
 
                 _connection?.Dispose();
                 _connection = new SqliteConnection("Data Source=:memory:");
@@ -53,7 +61,18 @@ namespace FCG.Users.IntegratedTests.Configurations
                 services.Remove(descriptor);
             }
 
-            RemoveKafkaServices(services);
+        }
+
+        private static void RemovePasswordEncrypterService(IServiceCollection services)
+        {
+            var passwordEncrypterService = services.Where(service => service.ServiceType == typeof(IPasswordEncrypterService));
+
+            if (passwordEncrypterService.Any())
+            {
+                services.Remove(passwordEncrypterService.First());
+            }
+
+            services.AddScoped<IPasswordEncrypterService>(_ => PasswordEncrypterServiceBuilder.Build());
         }
 
         private static void RemoveKafkaServices(IServiceCollection services)
@@ -89,7 +108,18 @@ namespace FCG.Users.IntegratedTests.Configurations
 
             Log.Information($"Creating {itemsQuantity} items for integrated test");
 
+            CreatedAdminUser = CreateAdminUser(context);
             CreatedUsers = CreateUser(context, itemsQuantity);
+            CreatedRefreshTokens = CreateRefreshTokens(context, CreatedUsers.ToList());
+        }
+
+        private User CreateAdminUser(FcgUserDbContext context)
+        {
+            var adminUser = User.CreateAdminUser("Admin User", "admin@fcgusers.com", "Admin@123");
+            context.User.Add(adminUser);
+            context.SaveChanges();
+            Log.Information("Created admin user with email: {Email}", adminUser.Email.Value);
+            return adminUser;
         }
 
         private List<User> CreateUser(FcgUserDbContext context, int itemsQuantity)
@@ -102,11 +132,28 @@ namespace FCG.Users.IntegratedTests.Configurations
                 users.Add(user);
             }
 
-            context.Users.AddRange(users);
+            context.User.AddRange(users);
             context.SaveChanges();
             Log.Information("Created {Count} regular users", users.Count);
 
             return users;
+        }
+
+        public List<RefreshToken> CreateRefreshTokens(FcgUserDbContext context, List<User> users)
+        {
+            var refreshTokens = new List<RefreshToken>();
+
+            foreach (var user in users)
+            {
+                var refreshToken = new RefreshTokenBuilder().BuildWithUserId(user.Id);
+                refreshTokens.Add(refreshToken);
+            }
+
+            context.RefreshToken.AddRange(refreshTokens);
+            context.SaveChanges();
+            Log.Information("Created {Count} refresh tokens", refreshTokens.Count);
+            CreatedRefreshTokens = refreshTokens;
+            return refreshTokens;
         }
 
         protected override void Dispose(bool disposing)

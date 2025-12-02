@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using FCG.Users.Application.Abstractions.Messaging;
 
 namespace FCG.Users.Application.UseCases.Users.Register
 {
-    public interface IRegisterUserUseCase : IRequestHandler<RegisterUserRequest, RegisterUserResponse> { }
+    public interface IRegisterUserUseCase : ICommandHandler<RegisterUserRequest, RegisterUserResponse> { }
 }

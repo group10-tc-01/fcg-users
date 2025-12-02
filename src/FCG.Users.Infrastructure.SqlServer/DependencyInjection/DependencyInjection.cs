@@ -1,12 +1,11 @@
 ﻿using FCG.Users.Domain.Abstractions;
+using FCG.Users.Domain.RefreshTokens;
 using FCG.Users.Domain.Users;
 using FCG.Users.Infrastructure.SqlServer.Persistance;
 using FCG.Users.Infrastructure.SqlServer.Persistance.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Serilog;
 using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.Infrastructure.SqlServer.DependencyInjection
@@ -18,7 +17,6 @@ namespace FCG.Users.Infrastructure.SqlServer.DependencyInjection
         {
             services.AddSqlServer(configuration);
             services.AddRepositories();
-            services.AddSerilogLogging(configuration);
 
             return services;
         }
@@ -34,32 +32,10 @@ namespace FCG.Users.Infrastructure.SqlServer.DependencyInjection
         private static void AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
             services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<FcgUserDbContext>());
         }
 
-        private static void AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)
-        {
-            var seqUrl = configuration["Serilog:WriteTo:1:Args:serverUrl"] ?? configuration["Serilog:SeqUrl"] ?? "http://localhost:5341";
-
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .Enrich.FromLogContext()
-                .Enrich.WithMachineName()
-                .Enrich.WithProperty("Application", "FCG.Users")
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
-                .WriteTo.Seq(seqUrl)
-                .CreateLogger();
-
-            Log.Information("Starting FCG.Users application");
-            Log.Information("Seq URL configured: {SeqUrl}", seqUrl);
-            Log.Information("Environment: {Environment}", configuration["ASPNETCORE_ENVIRONMENT"]);
-
-            services.AddLogging(loggingBuilder =>
-            {
-                loggingBuilder.ClearProviders();
-                loggingBuilder.AddSerilog();
-            });
-        }
     }
 }

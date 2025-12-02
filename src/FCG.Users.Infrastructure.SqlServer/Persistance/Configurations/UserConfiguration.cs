@@ -12,7 +12,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Configurations
         {
             base.Configure(builder);
 
-            builder.ToTable("Users");
+            builder.ToTable("User");
 
             builder.OwnsOne(u => u.Name, nameBuilder =>
             {
