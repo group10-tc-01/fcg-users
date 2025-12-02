@@ -33,6 +33,7 @@ namespace FCG.Users.UnitTests.Application.UseCases.Users.Register
             // Arrange
             var request = new RegisterUserRequestBuilder().Build();
             PasswordEncrypterServiceBuilder.SetupEncrypt(request.Password);
+            UserRepositoryBuilder.SetupGetByEmailAsync(null);
             UnitOfWorkBuilder.SetupSaveChangesAsync();
 
             // Act
