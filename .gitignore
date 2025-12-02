@@ -54,10 +54,11 @@ TestResult.xml
 nunit-*.xml
 
 .vs
-/src/FCG.Notifications.WebApi/FCG.Notifications.WebApi.csproj.user
+FCG.Users.WebApi.csproj.user
 
 appsettings.Development.json
 
-# Kubernetes Secrets - NEVER commit these files
+# Kubernetes Secrets
 k8s/**/secret-*.yaml
 !k8s/**/secret-*.yaml.example
+secret.example.yml
