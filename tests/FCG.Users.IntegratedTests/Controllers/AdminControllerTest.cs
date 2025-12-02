@@ -1,5 +1,7 @@
 using FCG.Users.Application.Abstractions.Pagination;
+using FCG.Users.Application.UseCases.Admin.CreateUser;
 using FCG.Users.Application.UseCases.Admin.GetUsers;
+using FCG.Users.Domain.Users;
 using FCG.Users.IntegratedTests.Configurations;
 using FCG.Users.WebApi.Models;
 using FluentAssertions;
@@ -11,6 +13,7 @@ namespace FCG.Users.IntegratedTests.Controllers
     public class AdminControllerTest : FcgFixture
     {
         private const string GetUsersUrl = "/api/v1/admin/users";
+        private const string CreateUserUrl = "/api/v1/admin/users";
 
         public AdminControllerTest(CustomWebApplicationFactory factory) : base(factory) { }
 
@@ -138,6 +141,115 @@ namespace FCG.Users.IntegratedTests.Controllers
             apiResponse.Should().NotBeNull();
             apiResponse.Data.Items.Should().BeEmpty();
             apiResponse.Data.TotalCount.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_CreateUserIsCalled_ShouldReturnCreatedWithUserId()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var request = new CreateUserRequest("New Test User", "newuser@test.com", "Password@123", Role.User);
+
+            // Act
+            var result = await DoAuthenticatedPost(CreateUserUrl, request, adminToken);
+            var responseContent = await result.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<CreateUserResponse>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Created);
+            apiResponse.Should().NotBeNull();
+            apiResponse.Success.Should().BeTrue();
+            apiResponse.Data.Should().NotBeNull();
+            apiResponse.Data.Id.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_CreateAdminUserIsCalled_ShouldReturnCreatedWithUserId()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var request = new CreateUserRequest("New Admin User", "newadmin@test.com", "Password@123", Role.Admin);
+
+            // Act
+            var result = await DoAuthenticatedPost(CreateUserUrl, request, adminToken);
+            var responseContent = await result.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<CreateUserResponse>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Created);
+            apiResponse.Should().NotBeNull();
+            apiResponse.Success.Should().BeTrue();
+            apiResponse.Data.Should().NotBeNull();
+            apiResponse.Data.Id.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_CreateUserWithExistingEmailIsCalled_ShouldReturnConflict()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var existingUser = Factory.CreatedUsers.First();
+            var request = new CreateUserRequest("Duplicate User", existingUser.Email.Value, "Password@123", Role.User);
+
+            // Act
+            var result = await DoAuthenticatedPost(CreateUserUrl, request, adminToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_CreateUserWithInvalidDataIsCalled_ShouldReturnBadRequest()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var request = new CreateUserRequest("", "invalid-email", "short", Role.User);
+
+            // Act
+            var result = await DoAuthenticatedPost(CreateUserUrl, request, adminToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        public async Task Given_RegularUser_When_CreateUserIsCalled_ShouldReturnForbidden()
+        {
+            // Arrange
+            var regularUser = Factory.CreatedUsers.First();
+            var userToken = GenerateToken(regularUser.Id, regularUser.Role.ToString());
+            var request = new CreateUserRequest("Test User", "test@test.com", "Password@123", Role.User);
+
+            // Act
+            var result = await DoAuthenticatedPost(CreateUserUrl, request, userToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
+        public async Task Given_NoAuthentication_When_CreateUserIsCalled_ShouldReturnUnauthorized()
+        {
+            // Arrange
+            var request = new CreateUserRequest("Test User", "test@test.com", "Password@123", Role.User);
+
+            // Act
+            var result = await DoPost(CreateUserUrl, request);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
     }
 }
