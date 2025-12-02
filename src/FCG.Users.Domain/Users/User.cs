@@ -31,9 +31,15 @@ namespace FCG.Users.Domain.Users
             return user;
         }
 
-        public void Update(string password)
+        public void UpdatePassword(string password)
         {
             Password = Password.CreateFromHash(password);
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateRole(Role newRole)
+        {
+            Role = newRole;
             UpdatedAt = DateTime.UtcNow;
         }
 

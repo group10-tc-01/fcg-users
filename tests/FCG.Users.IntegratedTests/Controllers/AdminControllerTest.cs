@@ -1,6 +1,7 @@
 using FCG.Users.Application.Abstractions.Pagination;
 using FCG.Users.Application.UseCases.Admin.CreateUser;
 using FCG.Users.Application.UseCases.Admin.GetUsers;
+using FCG.Users.Application.UseCases.Admin.UpdateUserRole;
 using FCG.Users.Domain.Users;
 using FCG.Users.IntegratedTests.Configurations;
 using FCG.Users.WebApi.Models;
@@ -247,6 +248,131 @@ namespace FCG.Users.IntegratedTests.Controllers
 
             // Act
             var result = await DoPost(CreateUserUrl, request);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_UpdateUserRoleIsCalled_ShouldReturnOkWithUpdatedUserId()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var targetUser = Factory.CreatedUsers.First();
+            var url = $"/api/v1/admin/users/{targetUser.Id}/update-role";
+            var request = new UpdateUserRoleBodyRequest(Role.Admin);
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, request, adminToken);
+            var responseContent = await result.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<UpdateUserRoleResponse>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.OK);
+            apiResponse.Should().NotBeNull();
+            apiResponse.Success.Should().BeTrue();
+            apiResponse.Data.Should().NotBeNull();
+            apiResponse.Data.Id.Should().Be(targetUser.Id);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_UpdateUserRoleToUserIsCalled_ShouldReturnOk()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var targetUser = Factory.CreatedUsers.First();
+            var url = $"/api/v1/admin/users/{targetUser.Id}/update-role";
+            var request = new UpdateUserRoleBodyRequest(Role.User);
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, request, adminToken);
+            var responseContent = await result.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<UpdateUserRoleResponse>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.OK);
+            apiResponse.Should().NotBeNull();
+            apiResponse.Success.Should().BeTrue();
+            apiResponse.Data.Id.Should().Be(targetUser.Id);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_UpdateUserRoleWithInvalidUserIdIsCalled_ShouldReturnNotFound()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var nonExistentUserId = Guid.NewGuid();
+            var url = $"/api/v1/admin/users/{nonExistentUserId}/update-role";
+            var request = new UpdateUserRoleBodyRequest(Role.Admin);
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, request, adminToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_UpdateUserRoleWithInvalidRoleIsCalled_ShouldReturnBadRequest()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var targetUser = Factory.CreatedUsers.First();
+            var url = $"/api/v1/admin/users/{targetUser.Id}/update-role";
+            var request = new UpdateUserRoleBodyRequest((Role)999);
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, request, adminToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        public async Task Given_RegularUser_When_UpdateUserRoleIsCalled_ShouldReturnForbidden()
+        {
+            // Arrange
+            var regularUser = Factory.CreatedUsers.First();
+            var userToken = GenerateToken(regularUser.Id, regularUser.Role.ToString());
+            var targetUser = Factory.CreatedUsers.Last();
+            var url = $"/api/v1/admin/users/{targetUser.Id}/update-role";
+            var request = new UpdateUserRoleBodyRequest(Role.Admin);
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, request, userToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
+        public async Task Given_NoAuthentication_When_UpdateUserRoleIsCalled_ShouldReturnUnauthorized()
+        {
+            // Arrange
+            var targetUserId = Guid.NewGuid();
+            var url = $"/api/v1/admin/users/{targetUserId}/update-role";
+            var request = new UpdateUserRoleBodyRequest(Role.Admin);
+            var json = JsonSerializer.Serialize(request);
+            var stringContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var httpRequest = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+            {
+                Content = stringContent
+            };
+
+            // Act
+            var result = await _httpClient.SendAsync(httpRequest);
 
             // Assert
             result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

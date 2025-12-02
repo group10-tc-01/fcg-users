@@ -45,7 +45,7 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
 
             _logger.LogInformation("[UpdateUserUseCase] Password updated for user: {UserId}", user.Id);
 
-            user.Update(hashedPassword);
+            user.UpdatePassword(hashedPassword);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

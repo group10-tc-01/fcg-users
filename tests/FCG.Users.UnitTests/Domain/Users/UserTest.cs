@@ -142,7 +142,7 @@ namespace FCG.Users.UnitTests.Domain.Users
 
             // Act
             var user = User.CreateRegularUser(userBuilder.Name, userBuilder.Email, userBuilder.Password);
-            user.Update(newPassword);
+            user.UpdatePassword(newPassword);
 
             // Assert
             user.Password.Value.Should().Be(newPassword);
