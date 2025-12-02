@@ -52,6 +52,12 @@ namespace FCG.Users.IntegratedTests.Configurations
             return await _httpClient.SendAsync(request);
         }
 
+        protected async Task<HttpResponseMessage> DoAuthenticatedGet(string url, string jwtToken)
+        {
+            SetAuthenticationHeader(jwtToken);
+            return await _httpClient.GetAsync(url);
+        }
+
         private void SetAuthenticationHeader(string jwtToken)
         {
             if (!string.IsNullOrEmpty(jwtToken))

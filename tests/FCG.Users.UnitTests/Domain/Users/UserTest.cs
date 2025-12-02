@@ -29,6 +29,27 @@ namespace FCG.Users.UnitTests.Domain.Users
         }
 
         [Fact]
+        public void Given_ValidUserParameters_When_Create_Then_ShouldIntantiateAdminUser()
+        {
+            // Arrange
+            var userBuilder = new UserBuilder().Build();
+
+            // Act
+            var user = User.CreateAdminUser(userBuilder.Name, userBuilder.Email, userBuilder.Password);
+
+            // Assert
+            user.Should().NotBeNull();
+            user.Id.Should().NotBe(Guid.Empty);
+            user.Name.Should().Be(userBuilder.Name);
+            user.Email.Should().Be(userBuilder.Email);
+            user.Role.Should().Be(Role.Admin);
+            user.RefreshTokens.Should().BeNullOrEmpty();
+            user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
+            user.UpdatedAt.TimeOfDay.Should().Be(TimeSpan.Zero);
+            user.IsActive.Should().BeTrue();
+        }
+
+        [Fact]
         public void Given_Deactivate_Called_When_UserIsActive_Then_ShouldSetIsActiveToFalse()
         {
             // Arrange

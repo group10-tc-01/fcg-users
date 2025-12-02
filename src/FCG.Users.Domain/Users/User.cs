@@ -22,6 +22,15 @@ namespace FCG.Users.Domain.Users
             return user;
         }
 
+        public static User CreateAdminUser(string name, string email, string password)
+        {
+            var user = new User(name, email, password, Role.Admin);
+
+            user.RaiseDomainEvent(new UserCreatedDomainEvent(user.Id, user.Name, user.Email));
+
+            return user;
+        }
+
         public void Update(string password)
         {
             Password = Password.CreateFromHash(password);

@@ -22,6 +22,7 @@ namespace FCG.Users.IntegratedTests.Configurations
     {
         private DbConnection? _connection;
         public List<User> CreatedUsers { get; private set; } = [];
+        public User CreatedAdminUser { get; private set; } = null!;
         public List<RefreshToken> CreatedRefreshTokens { get; private set; } = [];
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -107,8 +108,18 @@ namespace FCG.Users.IntegratedTests.Configurations
 
             Log.Information($"Creating {itemsQuantity} items for integrated test");
 
+            CreatedAdminUser = CreateAdminUser(context);
             CreatedUsers = CreateUser(context, itemsQuantity);
             CreatedRefreshTokens = CreateRefreshTokens(context, CreatedUsers.ToList());
+        }
+
+        private User CreateAdminUser(FcgUserDbContext context)
+        {
+            var adminUser = User.CreateAdminUser("Admin User", "admin@fcgusers.com", "Admin@123");
+            context.User.Add(adminUser);
+            context.SaveChanges();
+            Log.Information("Created admin user with email: {Email}", adminUser.Email.Value);
+            return adminUser;
         }
 
         private List<User> CreateUser(FcgUserDbContext context, int itemsQuantity)
