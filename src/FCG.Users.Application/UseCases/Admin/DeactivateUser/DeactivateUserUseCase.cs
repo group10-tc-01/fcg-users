@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FCG.Users.Domain.Abstractions;
+﻿using FCG.Users.Domain.Abstractions;
 using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;

@@ -1,5 +1,6 @@
 using FCG.Users.Application.Abstractions.Pagination;
 using FCG.Users.Application.UseCases.Admin.CreateUser;
+using FCG.Users.Application.UseCases.Admin.DeactivateUser;
 using FCG.Users.Application.UseCases.Admin.GetUsers;
 using FCG.Users.Application.UseCases.Admin.UpdateUserRole;
 using FCG.Users.Domain.Users;
@@ -376,6 +377,128 @@ namespace FCG.Users.IntegratedTests.Controllers
 
             // Assert
             result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_DeactivateUserIsCalled_ShouldReturnOkWithDeactivatedStatus()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var targetUser = Factory.CreatedUsers.First();
+            var url = $"/api/v1/admin/users/{targetUser.Id}/deactivate";
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, new { }, adminToken);
+            var responseContent = await result.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<DeactivateUserResponse>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.OK);
+            apiResponse.Should().NotBeNull();
+            apiResponse.Success.Should().BeTrue();
+            apiResponse.Data.Should().NotBeNull();
+            apiResponse.Data.Id.Should().Be(targetUser.Id);
+            apiResponse.Data.IsActive.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_DeactivateUserWithInvalidUserIdIsCalled_ShouldReturnNotFound()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var nonExistentUserId = Guid.NewGuid();
+            var url = $"/api/v1/admin/users/{nonExistentUserId}/deactivate";
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, new { }, adminToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_DeactivateUserWithEmptyIdIsCalled_ShouldReturnBadRequest()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var url = $"/api/v1/admin/users/{Guid.Empty}/deactivate";
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, new { }, adminToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        [Fact]
+        public async Task Given_RegularUser_When_DeactivateUserIsCalled_ShouldReturnForbidden()
+        {
+            // Arrange
+            var regularUser = Factory.CreatedUsers.First();
+            var userToken = GenerateToken(regularUser.Id, regularUser.Role.ToString());
+            var targetUser = Factory.CreatedUsers.Last();
+            var url = $"/api/v1/admin/users/{targetUser.Id}/deactivate";
+
+            // Act
+            var result = await DoAuthenticatedPatch(url, new { }, userToken);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [Fact]
+        public async Task Given_NoAuthentication_When_DeactivateUserIsCalled_ShouldReturnUnauthorized()
+        {
+            // Arrange
+            var targetUserId = Guid.NewGuid();
+            var url = $"/api/v1/admin/users/{targetUserId}/deactivate";
+            var json = JsonSerializer.Serialize(new { });
+            var stringContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var httpRequest = new HttpRequestMessage(new HttpMethod("PATCH"), url)
+            {
+                Content = stringContent
+            };
+
+            // Act
+            var result = await _httpClient.SendAsync(httpRequest);
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        [Fact]
+        public async Task Given_AdminUser_When_DeactivateAlreadyInactiveUserIsCalled_ShouldReturnOkWithInactiveStatus()
+        {
+            // Arrange
+            var adminUser = Factory.CreatedAdminUser;
+            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
+            var targetUser = Factory.CreatedUsers.First();
+            var url = $"/api/v1/admin/users/{targetUser.Id}/deactivate";
+
+            // First deactivation
+            await DoAuthenticatedPatch(url, new { }, adminToken);
+
+            // Act - Second deactivation
+            var result = await DoAuthenticatedPatch(url, new { }, adminToken);
+            var responseContent = await result.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<DeactivateUserResponse>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            // Assert
+            result.StatusCode.Should().Be(HttpStatusCode.OK);
+            apiResponse.Should().NotBeNull();
+            apiResponse.Success.Should().BeTrue();
+            apiResponse.Data.IsActive.Should().BeFalse();
         }
     }
 }
