@@ -53,7 +53,7 @@ namespace FCG.Users.IntegratedTests.Controllers
             // Arrange
             var adminUser = Factory.CreatedAdminUser;
             var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
-            var firstUser = Factory.CreatedUsers.First();
+            var firstUser = Factory.CreatedUsers.Last();
             var url = $"{GetUsersUrl}?Email={firstUser.Email.Value}";
 
             // Act
@@ -266,7 +266,7 @@ namespace FCG.Users.IntegratedTests.Controllers
             // Arrange
             var adminUser = Factory.CreatedAdminUser;
             var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
-            var targetUser = Factory.CreatedUsers.First();
+            var targetUser = Factory.CreatedUsers.Last();
             var url = $"/api/v1/admin/users/{targetUser.Id}/update-role";
             var request = new UpdateUserRoleBodyRequest(Role.Admin);
 
@@ -293,7 +293,7 @@ namespace FCG.Users.IntegratedTests.Controllers
             // Arrange
             var adminUser = Factory.CreatedAdminUser;
             var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
-            var targetUser = Factory.CreatedUsers.First();
+            var targetUser = Factory.CreatedUsers.Last();
             var url = $"/api/v1/admin/users/{targetUser.Id}/update-role";
             var request = new UpdateUserRoleBodyRequest(Role.User);
 
