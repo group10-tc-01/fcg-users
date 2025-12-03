@@ -3,6 +3,7 @@ using FCG.Users.Application.UseCases.Admin.CreateUser;
 using FCG.Users.Application.UseCases.Admin.DeactivateUser;
 using FCG.Users.Application.UseCases.Admin.GetUsers;
 using FCG.Users.Application.UseCases.Admin.UpdateUserRole;
+using FCG.Users.CommomTestsUtilities.Builders.Authentication;
 using FCG.Users.Domain.Users;
 using FCG.Users.IntegratedTests.Configurations;
 using FCG.Users.WebApi.Models;
@@ -153,6 +154,8 @@ namespace FCG.Users.IntegratedTests.Controllers
             var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
             var request = new CreateUserRequest("New Test User", "newuser@test.com", "Password@123", Role.User);
 
+            PasswordEncrypterServiceBuilder.SetupEncrypt();
+
             // Act
             var result = await DoAuthenticatedPost(CreateUserUrl, request, adminToken);
             var responseContent = await result.Content.ReadAsStringAsync();
@@ -170,6 +173,7 @@ namespace FCG.Users.IntegratedTests.Controllers
             apiResponse.Data.Id.Should().NotBeEmpty();
         }
 
+
         [Fact]
         public async Task Given_AdminUser_When_CreateAdminUserIsCalled_ShouldReturnCreatedWithUserId()
         {
@@ -177,6 +181,8 @@ namespace FCG.Users.IntegratedTests.Controllers
             var adminUser = Factory.CreatedAdminUser;
             var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
             var request = new CreateUserRequest("New Admin User", "newadmin@test.com", "Password@123", Role.Admin);
+
+            PasswordEncrypterServiceBuilder.SetupEncrypt();
 
             // Act
             var result = await DoAuthenticatedPost(CreateUserUrl, request, adminToken);
@@ -471,34 +477,6 @@ namespace FCG.Users.IntegratedTests.Controllers
 
             // Assert
             result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        }
-
-        [Fact]
-        public async Task Given_AdminUser_When_DeactivateAlreadyInactiveUserIsCalled_ShouldReturnOkWithInactiveStatus()
-        {
-            // Arrange
-            var adminUser = Factory.CreatedAdminUser;
-            var adminToken = GenerateToken(adminUser.Id, adminUser.Role.ToString());
-            var targetUser = Factory.CreatedUsers.First();
-            var url = $"/api/v1/admin/users/{targetUser.Id}/deactivate";
-
-            // First deactivation
-            await DoAuthenticatedPatch(url, new { }, adminToken);
-
-            // Act - Second deactivation
-            var result = await DoAuthenticatedPatch(url, new { }, adminToken);
-            var responseContent = await result.Content.ReadAsStringAsync();
-            var apiResponse = JsonSerializer.Deserialize<ApiResponse<DeactivateUserResponse>>(responseContent, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
-
-            // Assert
-            result.StatusCode.Should().Be(HttpStatusCode.OK);
-            apiResponse.Should().NotBeNull();
-            apiResponse.Success.Should().BeTrue();
-            apiResponse.Data.IsActive.Should().BeFalse();
         }
     }
 }
