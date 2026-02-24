@@ -1,8 +1,9 @@
 using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Abstractions.Results;
 using FCG.Users.Domain.Abstractions;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;
+using System.Net;
 
 namespace FCG.Users.Application.UseCases.Admin.CreateUser
 {
@@ -19,13 +20,13 @@ namespace FCG.Users.Application.UseCases.Admin.CreateUser
             _passwordEncrypter = passwordEncrypter;
         }
 
-        public async Task<CreateUserResponse> Handle(CreateUserRequest request, CancellationToken cancellationToken)
+        public async Task<Result<CreateUserResponse>> Handle(CreateUserRequest request, CancellationToken cancellationToken)
         {
             var existingUser = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
             if (existingUser != null)
             {
-                throw new ConflictException(ResourceMessages.EmailAlreadyInUse);
+                return Result<CreateUserResponse>.Failure(ResourceMessages.EmailAlreadyInUse, HttpStatusCode.Conflict);
             }
 
             var hashedPassword = _passwordEncrypter.Encrypt(request.Password);
@@ -38,7 +39,7 @@ namespace FCG.Users.Application.UseCases.Admin.CreateUser
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new CreateUserResponse(user.Id);
+            return Result<CreateUserResponse>.Success(new CreateUserResponse(user.Id));
         }
     }
 }

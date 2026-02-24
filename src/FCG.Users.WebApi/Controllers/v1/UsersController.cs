@@ -18,7 +18,7 @@ namespace FCG.Users.WebApi.Controllers.v1
         {
             var response = await _mediator.Send(request, cancellationToken);
 
-            return Created(string.Empty, ApiResponse<RegisterUserResponse>.SuccesResponse(response));
+            return FromResult(response, data => Created(string.Empty, ApiResponse<RegisterUserResponse>.SuccesResponse(data)));
         }
 
         [HttpPatch("update-password")]
@@ -29,7 +29,7 @@ namespace FCG.Users.WebApi.Controllers.v1
         public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest request, CancellationToken cancellationToken)
         {
             var response = await _mediator.Send(request, cancellationToken);
-            return Ok(ApiResponse<UpdatePasswordResponse>.SuccesResponse(response));
+            return FromResult(response, data => Ok(ApiResponse<UpdatePasswordResponse>.SuccesResponse(data)));
         }
     }
 }

@@ -1,8 +1,9 @@
-﻿using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Abstractions.Results;
 using FCG.Users.Domain.Abstractions;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;
+using System.Net;
 
 namespace FCG.Users.Application.UseCases.Users.Register
 {
@@ -19,13 +20,13 @@ namespace FCG.Users.Application.UseCases.Users.Register
             _passwordEncrypter = passwordEncrypter;
         }
 
-        public async Task<RegisterUserResponse> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
+        public async Task<Result<RegisterUserResponse>> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
         {
             var existingUser = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
             if (existingUser != null)
             {
-                throw new ConflictException(ResourceMessages.EmailAlreadyInUse);
+                return Result<RegisterUserResponse>.Failure(ResourceMessages.EmailAlreadyInUse, HttpStatusCode.Conflict);
             }
 
             var hashedPassword = _passwordEncrypter.Encrypt(request.Password);
@@ -36,7 +37,7 @@ namespace FCG.Users.Application.UseCases.Users.Register
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new RegisterUserResponse(user.Id);
+            return Result<RegisterUserResponse>.Success(new RegisterUserResponse(user.Id));
         }
     }
 }

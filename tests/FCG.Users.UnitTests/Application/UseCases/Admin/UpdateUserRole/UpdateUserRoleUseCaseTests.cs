@@ -3,9 +3,9 @@ using FCG.Users.CommomTestsUtilities.Builders;
 using FCG.Users.CommomTestsUtilities.Builders.Admin;
 using FCG.Users.CommomTestsUtilities.Builders.Users;
 using FCG.Users.Domain.Abstractions;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FluentAssertions;
+using System.Net;
 
 namespace FCG.Users.UnitTests.Application.UseCases.Admin.UpdateUserRole
 {
@@ -36,21 +36,24 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.UpdateUserRole
 
             // Assert
             response.Should().NotBeNull();
-            response.Id.Should().Be(user.Id);
+            response.IsSuccess.Should().BeTrue();
+            response.Value!.Id.Should().Be(user.Id);
         }
 
         [Fact]
-        public async Task Given_UserNotFound_When_Handle_Then_ShouldThrowNotFoundException()
+        public async Task Given_UserNotFound_When_Handle_Then_ShouldReturnNotFoundFailure()
         {
             // Arrange
             var request = new UpdateUserRoleRequestBuilder().Build();
             UserRepositoryBuilder.SetupGetByIdAsync(null);
 
             // Act
-            var act = async () => await _sut.Handle(request, CancellationToken.None);
+            var response = await _sut.Handle(request, CancellationToken.None);
 
             // Assert
-            await act.Should().ThrowAsync<NotFoundException>().WithMessage("User not found.");
+            response.IsSuccess.Should().BeFalse();
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            response.ErrorMessage.Should().Be("User not found.");
         }
 
         [Fact]
@@ -67,7 +70,8 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.UpdateUserRole
 
             // Assert
             response.Should().NotBeNull();
-            response.Id.Should().Be(user.Id);
+            response.IsSuccess.Should().BeTrue();
+            response.Value!.Id.Should().Be(user.Id);
         }
 
         [Fact]
@@ -84,7 +88,8 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.UpdateUserRole
 
             // Assert
             response.Should().NotBeNull();
-            response.Id.Should().Be(user.Id);
+            response.IsSuccess.Should().BeTrue();
+            response.Value!.Id.Should().Be(user.Id);
         }
     }
 }

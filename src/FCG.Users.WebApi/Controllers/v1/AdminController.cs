@@ -37,7 +37,7 @@ namespace FCG.Users.WebApi.Controllers.v1
         {
             var response = await _mediator.Send(request);
 
-            return CreatedAtAction(nameof(CreateUser), ApiResponse<CreateUserResponse>.SuccesResponse(response));
+            return FromResult(response, data => CreatedAtAction(nameof(CreateUser), ApiResponse<CreateUserResponse>.SuccesResponse(data)));
         }
 
         [HttpPatch("{id}/update-role")]
@@ -51,7 +51,7 @@ namespace FCG.Users.WebApi.Controllers.v1
             var request = new UpdateUserRoleRequest(id, bodyRequest.NewRole);
             var response = await _mediator.Send(request, cancellationToken);
 
-            return Ok(ApiResponse<UpdateUserRoleResponse>.SuccesResponse(response));
+            return FromResult(response, data => Ok(ApiResponse<UpdateUserRoleResponse>.SuccesResponse(data)));
         }
     }
 }

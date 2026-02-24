@@ -1,9 +1,10 @@
-﻿using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Abstractions.Results;
 using FCG.Users.Domain.Abstractions;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users.ValueObjects;
 using FCG.Users.Messages;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace FCG.Users.Application.UseCases.Users.UpdatePassword
 {
@@ -26,7 +27,7 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
             _loggedUser = loggedUser;
         }
 
-        public async Task<UpdatePasswordResponse> Handle(UpdatePasswordRequest request, CancellationToken cancellationToken)
+        public async Task<Result<UpdatePasswordResponse>> Handle(UpdatePasswordRequest request, CancellationToken cancellationToken)
         {
             var user = await _loggedUser.GetLoggedUserAsync();
 
@@ -36,7 +37,7 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
             {
                 _logger.LogWarning("[UpdateUserUseCase] Invalid current password for user: {UserId}", user.Id);
 
-                throw new DomainException(ResourceMessages.CurrentPasswordIncorrect);
+                return Result<UpdatePasswordResponse>.Failure(ResourceMessages.CurrentPasswordIncorrect, HttpStatusCode.BadRequest);
             }
 
             var newPassword = Password.Create(request.NewPassword);
@@ -51,7 +52,7 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
 
             _logger.LogInformation("[UpdateUserUseCase] Successfully updated password for user: {UserId}", user.Id);
 
-            return new UpdatePasswordResponse(user.Id, user.UpdatedAt);
+            return Result<UpdatePasswordResponse>.Success(new UpdatePasswordResponse(user.Id, user.UpdatedAt));
         }
     }
 }
