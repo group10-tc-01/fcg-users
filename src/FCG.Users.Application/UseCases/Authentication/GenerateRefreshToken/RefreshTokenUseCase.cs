@@ -1,10 +1,11 @@
 using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Abstractions.Results;
 using FCG.Users.Application.Settings;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace FCG.Users.Application.UseCases.Authentication.GenerateRefreshToken
 {
@@ -27,7 +28,7 @@ namespace FCG.Users.Application.UseCases.Authentication.GenerateRefreshToken
             _jwtSettings = jwtSettings.Value;
         }
 
-        public async Task<RefreshTokenResponse> Handle(RefreshTokenRequest request, CancellationToken cancellationToken)
+        public async Task<Result<RefreshTokenResponse>> Handle(RefreshTokenRequest request, CancellationToken cancellationToken)
         {
 
             var userId = await _authenticationService.ValidateRefreshTokenAsync(request.RefreshToken);
@@ -36,7 +37,7 @@ namespace FCG.Users.Application.UseCases.Authentication.GenerateRefreshToken
             {
                 _logger.LogWarning("[RefreshTokenUseCase] Invalid refresh token");
 
-                throw new UnauthorizedException(ResourceMessages.InvalidRefreshToken);
+                return Result<RefreshTokenResponse>.Failure(ResourceMessages.InvalidRefreshToken, HttpStatusCode.Unauthorized);
             }
 
             var user = await _userRepository.GetByIdAsync(Guid.Parse(userId), cancellationToken);
@@ -45,7 +46,7 @@ namespace FCG.Users.Application.UseCases.Authentication.GenerateRefreshToken
             {
                 _logger.LogWarning("[RefreshTokenUseCase]  User not found for userId: {UserId}", userId);
 
-                throw new UnauthorizedException(ResourceMessages.InvalidRefreshToken);
+                return Result<RefreshTokenResponse>.Failure(ResourceMessages.InvalidRefreshToken, HttpStatusCode.Unauthorized);
             }
 
             await _authenticationService.RevokeRefreshTokenAsync(request.RefreshToken);
@@ -56,7 +57,7 @@ namespace FCG.Users.Application.UseCases.Authentication.GenerateRefreshToken
 
             _logger.LogInformation("[RefreshTokenUseCase] Successfully refreshed token for user: {UserId}", user.Id);
 
-            return new RefreshTokenResponse(accessToken, newRefreshTokenValue, _jwtSettings.RefreshTokenExpirationDays);
+            return Result<RefreshTokenResponse>.Success(new RefreshTokenResponse(accessToken, newRefreshTokenValue, _jwtSettings.RefreshTokenExpirationDays));
         }
     }
 }

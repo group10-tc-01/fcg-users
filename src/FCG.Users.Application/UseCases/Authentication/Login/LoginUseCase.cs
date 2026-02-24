@@ -1,10 +1,11 @@
-﻿using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Abstractions.Authentication;
+using FCG.Users.Application.Abstractions.Results;
 using FCG.Users.Application.Settings;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace FCG.Users.Application.UseCases.Authentication.Login
 {
@@ -30,32 +31,24 @@ namespace FCG.Users.Application.UseCases.Authentication.Login
             _jwtSettings = jwtSettings.Value;
         }
 
-        public async Task<LoginResponse> Handle(LoginRequest request, CancellationToken cancellationToken)
+        public async Task<Result<LoginResponse>> Handle(LoginRequest request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("[LoginUseCase] Starting login process for email: {Email}", request.Email);
 
             var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
 
-            ValidateUser(request, user);
+            if (user is null || !_passwordEncrypter.IsValid(request.Password, user.Password.Value))
+            {
+                return Result<LoginResponse>.Failure(ResourceMessages.InvalidEmailOrPassword, HttpStatusCode.Unauthorized);
+            }
 
-            var accessToken = _authenticationService.GenerateAccessToken(user!);
+            var accessToken = _authenticationService.GenerateAccessToken(user);
             var refreshToken = _authenticationService.GenerateRefreshToken();
-            await _authenticationService.CreateRefreshTokenAsync(refreshToken, user!.Id);
+            await _authenticationService.CreateRefreshTokenAsync(refreshToken, user.Id);
 
-            _logger.LogInformation("[LoginUseCase] Login successful for user: {UserId}", user!.Id);
+            _logger.LogInformation("[LoginUseCase] Login successful for user: {UserId}", user.Id);
 
-            return new LoginResponse(accessToken, refreshToken, _jwtSettings.AccessTokenExpirationMinutes);
-        }
-
-        private void ValidateUser(LoginRequest request, User? user)
-        {
-            if (user is null)
-                throw new UnauthorizedException(ResourceMessages.InvalidEmailOrPassword);
-
-            var isPasswordValid = _passwordEncrypter.IsValid(request.Password, user.Password.Value);
-
-            if (isPasswordValid is false)
-                throw new UnauthorizedException(ResourceMessages.InvalidEmailOrPassword);
+            return Result<LoginResponse>.Success(new LoginResponse(accessToken, refreshToken, _jwtSettings.AccessTokenExpirationMinutes));
         }
     }
 }

@@ -5,10 +5,10 @@ using FCG.Users.CommomTestsUtilities.Builders.Admin;
 using FCG.Users.CommomTestsUtilities.Builders.Authentication;
 using FCG.Users.CommomTestsUtilities.Builders.Users;
 using FCG.Users.Domain.Abstractions;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;
 using FluentAssertions;
+using System.Net;
 
 namespace FCG.Users.UnitTests.Application.UseCases.Admin.CreateUser
 {
@@ -41,11 +41,12 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.CreateUser
 
             // Assert
             response.Should().NotBeNull();
-            response.Id.Should().NotBeEmpty();
+            response.IsSuccess.Should().BeTrue();
+            response.Value!.Id.Should().NotBeEmpty();
         }
 
         [Fact]
-        public async Task Given_EmailAlreadyExists_When_Handle_Then_ShouldThrowConflictException()
+        public async Task Given_EmailAlreadyExists_When_Handle_Then_ShouldReturnConflictFailure()
         {
             // Arrange
             var request = new CreateUserRequestBuilder().Build();
@@ -53,10 +54,12 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.CreateUser
             UserRepositoryBuilder.SetupGetByEmailAsync(user);
 
             // Act
-            var act = async () => await _sut.Handle(request, CancellationToken.None);
+            var response = await _sut.Handle(request, CancellationToken.None);
 
             // Assert
-            await act.Should().ThrowAsync<ConflictException>().WithMessage(ResourceMessages.EmailAlreadyInUse);
+            response.IsSuccess.Should().BeFalse();
+            response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+            response.ErrorMessage.Should().Be(ResourceMessages.EmailAlreadyInUse);
         }
 
         [Fact]
@@ -73,7 +76,8 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.CreateUser
 
             // Assert
             response.Should().NotBeNull();
-            response.Id.Should().NotBeEmpty();
+            response.IsSuccess.Should().BeTrue();
+            response.Value!.Id.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -90,7 +94,8 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.CreateUser
 
             // Assert
             response.Should().NotBeNull();
-            response.Id.Should().NotBeEmpty();
+            response.IsSuccess.Should().BeTrue();
+            response.Value!.Id.Should().NotBeEmpty();
         }
     }
 }

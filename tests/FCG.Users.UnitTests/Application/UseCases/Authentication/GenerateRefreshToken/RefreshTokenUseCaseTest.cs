@@ -3,13 +3,13 @@ using FCG.Users.Application.Settings;
 using FCG.Users.Application.UseCases.Authentication.GenerateRefreshToken;
 using FCG.Users.CommomTestsUtilities.Builders.Authentication;
 using FCG.Users.CommomTestsUtilities.Builders.Users;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using System.Net;
 
 namespace FCG.Users.UnitTests.Application.UseCases.Authentication.GenerateRefreshToken
 {
@@ -58,27 +58,30 @@ namespace FCG.Users.UnitTests.Application.UseCases.Authentication.GenerateRefres
 
             // Assert
             response.Should().NotBeNull();
-            response.AccessToken.Should().Be(newAccessToken);
-            response.RefreshToken.Should().Be(newRefreshToken);
-            response.ExpiresInDays.Should().Be(_jwtSettings.Value.RefreshTokenExpirationDays);
+            response.IsSuccess.Should().BeTrue();
+            response.Value!.AccessToken.Should().Be(newAccessToken);
+            response.Value.RefreshToken.Should().Be(newRefreshToken);
+            response.Value.ExpiresInDays.Should().Be(_jwtSettings.Value.RefreshTokenExpirationDays);
         }
 
         [Fact]
-        public async Task Given_InvalidRefreshToken_When_Handle_Then_ShouldThrowUnauthorizedException()
+        public async Task Given_InvalidRefreshToken_When_Handle_Then_ShouldReturnUnauthorizedFailure()
         {
             // Arrange
             var request = new RefreshTokenRequestBuilder().Build();
             AuthenticationServiceBuilder.SetupValidateRefreshTokenAsync(null);
 
             // Act
-            var act = async () => await _sut.Handle(request, CancellationToken.None);
+            var response = await _sut.Handle(request, CancellationToken.None);
 
             // Assert
-            await act.Should().ThrowAsync<UnauthorizedException>().WithMessage(ResourceMessages.InvalidRefreshToken);
+            response.IsSuccess.Should().BeFalse();
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            response.ErrorMessage.Should().Be(ResourceMessages.InvalidRefreshToken);
         }
 
         [Fact]
-        public async Task Given_ValidRefreshTokenButUserNotFound_When_Handle_Then_ShouldThrowUnauthorizedException()
+        public async Task Given_ValidRefreshTokenButUserNotFound_When_Handle_Then_ShouldReturnUnauthorizedFailure()
         {
             // Arrange
             var userId = Guid.NewGuid();
@@ -87,10 +90,12 @@ namespace FCG.Users.UnitTests.Application.UseCases.Authentication.GenerateRefres
             UserRepositoryBuilder.SetupGetByIdAsync(null);
 
             // Act
-            var act = async () => await _sut.Handle(request, CancellationToken.None);
+            var response = await _sut.Handle(request, CancellationToken.None);
 
             // Assert
-            await act.Should().ThrowAsync<UnauthorizedException>().WithMessage(ResourceMessages.InvalidRefreshToken);
+            response.IsSuccess.Should().BeFalse();
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            response.ErrorMessage.Should().Be(ResourceMessages.InvalidRefreshToken);
         }
     }
 }

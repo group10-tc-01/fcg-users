@@ -1,7 +1,8 @@
+using FCG.Users.Application.Abstractions.Results;
 using FCG.Users.Domain.Abstractions;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
 using FCG.Users.Messages;
+using System.Net;
 
 namespace FCG.Users.Application.UseCases.Admin.UpdateUserRole
 {
@@ -16,20 +17,20 @@ namespace FCG.Users.Application.UseCases.Admin.UpdateUserRole
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<UpdateUserRoleResponse> Handle(UpdateUserRoleRequest request, CancellationToken cancellationToken)
+        public async Task<Result<UpdateUserRoleResponse>> Handle(UpdateUserRoleRequest request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
 
             if (user == null)
             {
-                throw new NotFoundException("User not found.");
+                return Result<UpdateUserRoleResponse>.Failure(string.Format(ResourceMessages.UserNotFound, request.Id), HttpStatusCode.NotFound);
             }
 
             user.UpdateRole(request.NewRole);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new UpdateUserRoleResponse(user.Id);
+            return Result<UpdateUserRoleResponse>.Success(new UpdateUserRoleResponse(user.Id));
         }
     }
 }

@@ -17,7 +17,7 @@ namespace FCG.Users.WebApi.Controllers.v1
         {
             var response = await _mediator.Send(request, CancellationToken.None);
 
-            return Ok(ApiResponse<LoginResponse>.SuccesResponse(response));
+            return FromResult(response, data => Ok(ApiResponse<LoginResponse>.SuccesResponse(data)));
         }
 
         [HttpPost("refresh-token")]
@@ -28,7 +28,7 @@ namespace FCG.Users.WebApi.Controllers.v1
         {
             var response = await _mediator.Send(request, CancellationToken.None);
 
-            return Ok(ApiResponse<RefreshTokenResponse>.SuccesResponse(response));
+            return FromResult(response, data => Ok(ApiResponse<RefreshTokenResponse>.SuccesResponse(data)));
         }
     }
 }

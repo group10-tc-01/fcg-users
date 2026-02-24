@@ -4,11 +4,11 @@ using FCG.Users.CommomTestsUtilities.Builders;
 using FCG.Users.CommomTestsUtilities.Builders.Authentication;
 using FCG.Users.CommomTestsUtilities.Builders.Users;
 using FCG.Users.Domain.Abstractions;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Messages;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Net;
 
 namespace FCG.Users.UnitTests.Application.UseCases.Users.UpdatePassword
 {
@@ -46,11 +46,12 @@ namespace FCG.Users.UnitTests.Application.UseCases.Users.UpdatePassword
 
             // Assert
             response.Should().NotBeNull();
-            response.Id.Should().Be(user.Id);
+            response.IsSuccess.Should().BeTrue();
+            response.Value!.Id.Should().Be(user.Id);
         }
 
         [Fact]
-        public async Task Given_InvalidCurrentPassword_When_Handle_Then_ShouldThrowDomainException()
+        public async Task Given_InvalidCurrentPassword_When_Handle_Then_ShouldReturnBadRequestFailure()
         {
             // Arrange
             var user = new UserBuilder().Build();
@@ -60,10 +61,12 @@ namespace FCG.Users.UnitTests.Application.UseCases.Users.UpdatePassword
             PasswordEncrypterServiceBuilder.SetupIsValid(false);
 
             // Act
-            var act = async () => await _sut.Handle(request, CancellationToken.None);
+            var response = await _sut.Handle(request, CancellationToken.None);
 
             // Assert
-            await act.Should().ThrowAsync<DomainException>().WithMessage(ResourceMessages.CurrentPasswordIncorrect);
+            response.IsSuccess.Should().BeFalse();
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            response.ErrorMessage.Should().Be(ResourceMessages.CurrentPasswordIncorrect);
         }
     }
 }
