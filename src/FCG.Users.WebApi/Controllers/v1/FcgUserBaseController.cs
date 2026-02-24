@@ -17,9 +17,9 @@ namespace FCG.Users.WebApi.Controllers.v1
 
         protected IActionResult FromResult<T>(Result<T> result, Func<T, IActionResult> onSuccess)
         {
-            if (result.IsSuccess && result.Value is not null)
+            if (result.IsSuccess)
             {
-                return onSuccess(result.Value);
+                return onSuccess(result.Value!);
             }
 
             return StatusCode((int)result.StatusCode, ApiResponse<T>.ErrorResponse(new List<string> { result.ErrorMessage! }, result.StatusCode));

@@ -4,6 +4,7 @@ using FCG.Users.CommomTestsUtilities.Builders.Admin;
 using FCG.Users.CommomTestsUtilities.Builders.Users;
 using FCG.Users.Domain.Abstractions;
 using FCG.Users.Domain.Users;
+using FCG.Users.Messages;
 using FluentAssertions;
 using System.Net;
 
@@ -53,7 +54,7 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.UpdateUserRole
             // Assert
             response.IsSuccess.Should().BeFalse();
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-            response.ErrorMessage.Should().Be("User not found.");
+            response.ErrorMessage.Should().Be(string.Format(ResourceMessages.UserNotFound, request.Id));
         }
 
         [Fact]

@@ -1,6 +1,7 @@
 using FCG.Users.Application.Abstractions.Results;
 using FCG.Users.Domain.Abstractions;
 using FCG.Users.Domain.Users;
+using FCG.Users.Messages;
 using System.Net;
 
 namespace FCG.Users.Application.UseCases.Admin.UpdateUserRole
@@ -22,7 +23,7 @@ namespace FCG.Users.Application.UseCases.Admin.UpdateUserRole
 
             if (user == null)
             {
-                return Result<UpdateUserRoleResponse>.Failure("User not found.", HttpStatusCode.NotFound);
+                return Result<UpdateUserRoleResponse>.Failure(string.Format(ResourceMessages.UserNotFound, request.Id), HttpStatusCode.NotFound);
             }
 
             user.UpdateRole(request.NewRole);
