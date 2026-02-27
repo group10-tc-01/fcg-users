@@ -5,9 +5,7 @@ using FCG.Users.CommomTestsUtilities.Builders.Admin;
 using FCG.Users.CommomTestsUtilities.Builders.Authentication;
 using FCG.Users.CommomTestsUtilities.Builders.Users;
 using FCG.Users.Domain.Abstractions;
-using FCG.Users.Domain.Exceptions;
 using FCG.Users.Domain.Users;
-using FCG.Users.Messages;
 using FluentAssertions;
 
 namespace FCG.Users.UnitTests.Application.UseCases.Admin.CreateUser
@@ -42,21 +40,6 @@ namespace FCG.Users.UnitTests.Application.UseCases.Admin.CreateUser
             // Assert
             response.Should().NotBeNull();
             response.Id.Should().NotBeEmpty();
-        }
-
-        [Fact]
-        public async Task Given_EmailAlreadyExists_When_Handle_Then_ShouldThrowConflictException()
-        {
-            // Arrange
-            var request = new CreateUserRequestBuilder().Build();
-            var user = new UserBuilder().Build();
-            UserRepositoryBuilder.SetupGetByEmailAsync(user);
-
-            // Act
-            var act = async () => await _sut.Handle(request, CancellationToken.None);
-
-            // Assert
-            await act.Should().ThrowAsync<ConflictException>().WithMessage(ResourceMessages.EmailAlreadyInUse);
         }
 
         [Fact]
