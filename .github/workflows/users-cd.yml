@@ -127,12 +127,22 @@ jobs:
           echo "📦 Using built image: ${{ needs.build-and-push.outputs.full_image }}"
         fi
     
+    - name: Extract image tag
+      id: image_tag
+      run: |
+        image="${{ steps.deploy_image.outputs.image }}"
+        tag="${image##*:}"
+        echo "tag=${tag}" >> $GITHUB_OUTPUT
+        echo "🏷️  Image tag: ${tag}"
+    
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         images: ${{ steps.deploy_image.outputs.image }}
+        app-settings: |
+          IMAGE_VERSION=${{ steps.image_tag.outputs.tag }}
     
     - name: Deployment Success
       run: |
