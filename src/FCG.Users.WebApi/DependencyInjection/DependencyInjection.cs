@@ -16,17 +16,27 @@ namespace FCG.Users.WebApi.DependencyInjection
             services.AddFilters();
             services.AddHealthChecks().AddDbContextCheck<FcgUserDbContext>();
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddSwaggerConfiguration();
+            services.AddSwaggerConfiguration(configuration);
             services.AddSerilogLogging(configuration);
 
             return services;
         }
 
-        private static void AddSwaggerConfiguration(this IServiceCollection services)
+        private static void AddSwaggerConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
+            var imageVersion = configuration["IMAGE_VERSION"];
+            var description = string.IsNullOrWhiteSpace(imageVersion)
+                ? "Image: unknown"
+                : $"Image: {imageVersion}";
+
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "FCG.Users - V1", Version = "v1.0" });
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "FCG.Users - V1",
+                    Version = "v1.0",
+                    Description = description
+                });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
