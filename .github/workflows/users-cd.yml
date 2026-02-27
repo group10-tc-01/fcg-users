@@ -95,14 +95,18 @@ jobs:
     
     - name: Set final outputs
       id: final_output
+      env:
+        BUILT_IMAGE: ${{ steps.image.outputs.full_image }}
+        FCG_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY_NAME }}.azurecr.io
+        FCG_IMAGE_NAME: fcg-users
       run: |
-        if [ -z "${{ steps.image.outputs.full_image }}" ]; then
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        if [ -z "${BUILT_IMAGE}" ]; then
+          IMAGE="${FCG_REGISTRY}/${FCG_IMAGE_NAME}:latest"
           echo "full_image=${IMAGE}" >> $GITHUB_OUTPUT
           echo "⚠️  Build skipado, usando: ${IMAGE}"
         else
-          echo "full_image=${{ steps.image.outputs.full_image }}" >> $GITHUB_OUTPUT
-          echo "✅ Usando imagem buildada: ${{ steps.image.outputs.full_image }}"
+          echo "full_image=${BUILT_IMAGE}" >> $GITHUB_OUTPUT
+          echo "✅ Usando imagem buildada: ${BUILT_IMAGE}"
         fi
     
     - name: Create and push tag
@@ -130,13 +134,19 @@ jobs:
     steps:
     - name: Determine image to deploy
       id: deploy_image
+      env:
+        BUILT_IMAGE: ${{ needs.build-and-push.outputs.full_image }}
+        CUSTOM_IMAGE: ${{ github.event.inputs.custom_image }}
       run: |
-        if [ "${{ github.event.inputs.custom_image }}" != "" ]; then
-          echo "image=${{ github.event.inputs.custom_image }}" >> $GITHUB_OUTPUT
-          echo "📦 Using custom image: ${{ github.event.inputs.custom_image }}"
+        if [ -n "${CUSTOM_IMAGE}" ]; then
+          echo "image=${CUSTOM_IMAGE}" >> $GITHUB_OUTPUT
+          echo "📦 Using custom image: ${CUSTOM_IMAGE}"
+        elif [ -n "${BUILT_IMAGE}" ]; then
+          echo "image=${BUILT_IMAGE}" >> $GITHUB_OUTPUT
+          echo "📦 Using built image: ${BUILT_IMAGE}"
         else
-          echo "image=${{ needs.build-and-push.outputs.full_image }}" >> $GITHUB_OUTPUT
-          echo "📦 Using built image: ${{ needs.build-and-push.outputs.full_image }}"
+          echo "❌ ERROR: No image available to deploy!"
+          exit 1
         fi
     
     - name: Validate image output
