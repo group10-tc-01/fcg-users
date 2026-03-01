@@ -7,6 +7,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Elmah.Io.AspNetCore" Version="5.3.88" />
+		<PackageReference Include="Elmah.Io.AspNetCore.Serilog" Version="5.2.27" />
 		<PackageReference Include="MediatR" Version="13.1.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.11">

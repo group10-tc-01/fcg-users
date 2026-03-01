@@ -4,6 +4,7 @@ using FCG.Users.WebApi.Filters;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Diagnostics.CodeAnalysis;
+using Serilog.Sinks.ElmahIo;
 
 namespace FCG.Users.WebApi.DependencyInjection
 {
@@ -18,6 +19,7 @@ namespace FCG.Users.WebApi.DependencyInjection
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddSwaggerConfiguration(configuration);
             services.AddSerilogLogging(configuration);
+            services.AddElmahIo(configuration);
 
             return services;
         }
@@ -94,16 +96,30 @@ namespace FCG.Users.WebApi.DependencyInjection
 
         private static void AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)
         {
-            var seqUrl = configuration["Serilog:WriteTo:1:Args:serverUrl"] ?? configuration["Serilog:SeqUrl"] ?? "http://localhost:5341";
+            var seqUrl = configuration["Serilog:WriteTo:1:Args:serverUrl"]
+                         ?? configuration["Serilog:SeqUrl"]
+                         ?? "http://localhost:5341";
 
-            Log.Logger = new LoggerConfiguration()
+            var loggerConfig = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .Enrich.FromLogContext()
                 .Enrich.WithMachineName()
                 .Enrich.WithProperty("Application", "FCG.Users")
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
-                .WriteTo.Seq(seqUrl)
-                .CreateLogger();
+                .WriteTo.Seq(seqUrl);
+
+            var apiKey = configuration["ElmahIo:ApiKey"];
+            var logIdRaw = configuration["ElmahIo:LogId"];
+
+            if (!string.IsNullOrEmpty(apiKey) && Guid.TryParse(logIdRaw, out var logId))
+            {
+                loggerConfig.WriteTo.ElmahIo(new ElmahIoSinkOptions(apiKey, logId)
+                {
+                    MinimumLogEventLevel = Serilog.Events.LogEventLevel.Warning
+                });
+            }
+
+            Log.Logger = loggerConfig.CreateLogger();
 
             Log.Information("Starting FCG.Users application");
             Log.Information("Seq URL configured: {SeqUrl}", seqUrl);
@@ -114,6 +130,21 @@ namespace FCG.Users.WebApi.DependencyInjection
                 loggingBuilder.ClearProviders();
                 loggingBuilder.AddSerilog();
             });
+        }
+
+        private static void AddElmahIo(this IServiceCollection services, IConfiguration configuration)
+        {
+            var apiKey = configuration["ElmahIo:ApiKey"];
+            var logIdRaw = configuration["ElmahIo:LogId"];
+
+            if (!string.IsNullOrEmpty(apiKey) && Guid.TryParse(logIdRaw, out var logId))
+            {
+                services.AddElmahIo(options =>
+                {
+                    options.ApiKey = apiKey;
+                    options.LogId = logId;
+                });
+            }
         }
     }
 }
