@@ -24,18 +24,13 @@ namespace FCG.Users.WebApi.DependencyInjection
 
         private static void AddSwaggerConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            var imageVersion = configuration["IMAGE_VERSION"];
-            var description = string.IsNullOrWhiteSpace(imageVersion)
-                ? "Image: unknown"
-                : $"Image: {imageVersion}";
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "FCG.Users - V1",
-                    Version = "v1.0",
-                    Description = description
+                    Version = "v1.0"
                 });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

@@ -139,54 +139,6 @@ jobs:
           echo "📦 Using built image: ${{ needs.build-and-push.outputs.full_image }}"
         fi
     
-    - name: Validate image output
-      run: |
-        if [ -z "${{ steps.deploy_image.outputs.image }}" ]; then
-          echo "❌ ERROR: Image output is empty!"
-          echo "Debug info:"
-          echo "  build-and-push.outputs.full_image: ${{ needs.build-and-push.outputs.full_image }}"
-          echo "  custom_image input: ${{ github.event.inputs.custom_image }}"
-          exit 1
-        fi
-        echo "✅ Image validated: ${{ steps.deploy_image.outputs.image }}"
-    
-    - name: Extract image tag
-      id: image_tag
-      run: |
-        image="${{ steps.deploy_image.outputs.image }}"
-        echo "📦 Full image: ${image}"
-        
-        if [[ "$image" == *:* ]]; then
-          tag="${image##*:}"
-        else
-          tag="latest"
-          echo "⚠️  No tag found, defaulting to: latest"
-        fi
-        
-        echo "tag=${tag}" >> $GITHUB_OUTPUT
-        echo "🏷️  Extracted tag: ${tag}"
-    
-    - name: Set IMAGE_VERSION app setting via REST API
-      run: |
-        # Extrair username e password do publish-profile
-        USERNAME=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP '(?<=userName=")[^"]+' | head -1)
-        PASSWORD=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP '(?<=userPWD=")[^"]+' | head -1)
-        
-        WEBAPP_NAME="${{ secrets.AZURE_WEBAPP_NAME }}"
-        TAG="${{ steps.image_tag.outputs.tag }}"
-        
-        echo "🔧 Setting IMAGE_VERSION to: ${TAG}"
-        
-        # Fazer requisição para API do Azure Web App
-        curl -X POST \
-          "https://${WEBAPP_NAME}.scm.azurewebsites.net/api/settings" \
-          -u "${USERNAME}:${PASSWORD}" \
-          -H "Content-Type: application/json" \
-          -d '{"IMAGE_VERSION":"'"${TAG}"'"}' \
-          --fail
-        
-        echo "✅ IMAGE_VERSION set to: ${TAG}"
-    
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
