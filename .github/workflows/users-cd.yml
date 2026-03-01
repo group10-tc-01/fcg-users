@@ -34,7 +34,7 @@ jobs:
     
     outputs:
       version: ${{ steps.version.outputs.version }}
-      full_image: ${{ steps.image.outputs.full_image }}
+      full_image: ${{ steps.final_output.outputs.full_image }}
     
     steps:
     - name: Checkout code
@@ -93,6 +93,18 @@ jobs:
         echo "✅ Image pushed: ${FULL_IMAGE}"
         echo "✅ Image pushed: ${LATEST_IMAGE}"
     
+    - name: Set final outputs
+      id: final_output
+      run: |
+        if [ -z "${{ steps.image.outputs.full_image }}" ]; then
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "full_image=${IMAGE}" >> $GITHUB_OUTPUT
+          echo "⚠️  Build skipado, usando: ${IMAGE}"
+        else
+          echo "full_image=${{ steps.image.outputs.full_image }}" >> $GITHUB_OUTPUT
+          echo "✅ Usando imagem buildada: ${{ steps.image.outputs.full_image }}"
+        fi
+    
     - name: Create and push tag
       if: ${{ github.event_name == 'push' || github.event.inputs.deploy_to_acr == 'true' }}
       run: |
@@ -146,5 +158,5 @@ jobs:
         echo "📦 Imagem deployada:"
         echo "   ${{ steps.deploy_image.outputs.image }}"
         echo ""
-        echo "🏷️  Versão: ${{ needs.build-and-push.outputs.version }}"
+        echo "🏷️  Versão: ${{ steps.image_tag.outputs.tag }}"
         echo "=================================="
