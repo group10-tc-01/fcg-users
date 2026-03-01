@@ -43,7 +43,7 @@ namespace FCG.Users.WebApi
 
             app.UseSwagger();
             app.UseSwaggerUI();
-
+            app.UseElmahIo();
             app.UseCustomerExceptionHandler();
             app.UseGlobalCorrelationId();
 

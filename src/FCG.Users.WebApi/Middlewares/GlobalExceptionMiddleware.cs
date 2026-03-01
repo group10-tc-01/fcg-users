@@ -13,12 +13,14 @@ namespace FCG.Users.WebApi.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly IHostEnvironment _env;
+        private readonly ILogger<GlobalExceptionMiddleware> _logger;
         private const string CorrelationIdKey = "CorrelationId";
 
-        public GlobalExceptionMiddleware(RequestDelegate next, IHostEnvironment env)
+        public GlobalExceptionMiddleware(RequestDelegate next, IHostEnvironment env, ILogger<GlobalExceptionMiddleware> logger)
         {
             _next = next;
             _env = env;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -43,15 +45,22 @@ namespace FCG.Users.WebApi.Middlewares
 
             if (exception is ValidationException validationException)
             {
+                _logger.LogWarning("Validation failed. CorrelationId: {CorrelationId} | Errors: {Errors}", correlationId, validationException.Errors.Select(e => e.ErrorMessage));
                 await HandleValidationExceptionAsync(context, validationException, correlationId);
                 return;
             }
 
             if (exception is BaseException apiException)
             {
+                _logger.LogWarning(apiException, "Business exception. CorrelationId: {CorrelationId} | StatusCode: {StatusCode} | Message: {Message}", correlationId, 
+                    (int)apiException.StatusCode, apiException.Message);
+
                 await HandleApiExceptionAsync(context, apiException, correlationId);
                 return;
             }
+
+            _logger.LogError(exception, "Unhandled exception. CorrelationId: {CorrelationId} | TraceId: {TraceId} | Path: {Path}", 
+                correlationId, traceId, context.Request.Path);
 
             await HandleGenericExceptionAsync(context, exception, traceId, correlationId);
         }
