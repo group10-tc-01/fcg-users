@@ -3,6 +3,7 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using FCG.Users.Infrastructure.SqlServer.Persistance;
 using FCG.Users.WebApi.Filters;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
 using System.Diagnostics.CodeAnalysis;
