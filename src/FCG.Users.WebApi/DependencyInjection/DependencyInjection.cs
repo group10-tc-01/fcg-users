@@ -1,7 +1,9 @@
 ﻿using Asp.Versioning;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using FCG.Users.Infrastructure.SqlServer.Persistance;
 using FCG.Users.WebApi.Filters;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Trace;
 using Serilog;
 using System.Diagnostics.CodeAnalysis;
 
@@ -18,6 +20,43 @@ namespace FCG.Users.WebApi.DependencyInjection
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddSwaggerConfiguration(configuration);
             services.AddSerilogLogging(configuration);
+            services.AddOpenTelemetryMonitoring();
+
+            return services;
+        }
+
+        public static IServiceCollection AddOpenTelemetryMonitoring(this IServiceCollection services)
+        {
+            services.AddOpenTelemetry()
+                .UseAzureMonitor()
+                .WithTracing(tracing =>
+                {
+                    tracing
+                        .AddAspNetCoreInstrumentation(options =>
+                        {
+                            options.RecordException = true;
+                            options.Filter = httpContext =>
+                            {
+                                // Don't track health check requests
+                                return !httpContext.Request.Path.StartsWithSegments("/health");
+                            };
+                        })
+                        .AddHttpClientInstrumentation(options =>
+                        {
+                            options.RecordException = true;
+                        })
+                        .AddSqlClientInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                            options.RecordException = true;
+                        });
+                })
+                .WithMetrics(metrics =>
+                {
+                    metrics
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation();
+                });
 
             return services;
         }
