@@ -34,7 +34,7 @@ jobs:
     
     outputs:
       version: ${{ steps.version.outputs.version }}
-      full_image: ${{ steps.final_output.outputs.full_image }}
+      full_image: ${{ steps.image.outputs.full_image }}
     
     steps:
     - name: Checkout code
@@ -93,22 +93,6 @@ jobs:
         echo "✅ Image pushed: ${FULL_IMAGE}"
         echo "✅ Image pushed: ${LATEST_IMAGE}"
     
-    - name: Set final outputs
-      id: final_output
-      env:
-        BUILT_IMAGE: ${{ steps.image.outputs.full_image }}
-        FCG_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY_NAME }}.azurecr.io
-        FCG_IMAGE_NAME: fcg-users
-      run: |
-        if [ -z "${BUILT_IMAGE}" ]; then
-          IMAGE="${FCG_REGISTRY}/${FCG_IMAGE_NAME}:latest"
-          echo "full_image=${IMAGE}" >> $GITHUB_OUTPUT
-          echo "⚠️  Build skipado, usando: ${IMAGE}"
-        else
-          echo "full_image=${BUILT_IMAGE}" >> $GITHUB_OUTPUT
-          echo "✅ Usando imagem buildada: ${BUILT_IMAGE}"
-        fi
-    
     - name: Create and push tag
       if: ${{ github.event_name == 'push' || github.event.inputs.deploy_to_acr == 'true' }}
       run: |
@@ -134,68 +118,14 @@ jobs:
     steps:
     - name: Determine image to deploy
       id: deploy_image
-      env:
-        BUILT_IMAGE: ${{ needs.build-and-push.outputs.full_image }}
-        CUSTOM_IMAGE: ${{ github.event.inputs.custom_image }}
       run: |
-        if [ -n "${CUSTOM_IMAGE}" ]; then
-          echo "image=${CUSTOM_IMAGE}" >> $GITHUB_OUTPUT
-          echo "📦 Using custom image: ${CUSTOM_IMAGE}"
-        elif [ -n "${BUILT_IMAGE}" ]; then
-          echo "image=${BUILT_IMAGE}" >> $GITHUB_OUTPUT
-          echo "📦 Using built image: ${BUILT_IMAGE}"
+        if [ "${{ github.event.inputs.custom_image }}" != "" ]; then
+          echo "image=${{ github.event.inputs.custom_image }}" >> $GITHUB_OUTPUT
+          echo "📦 Using custom image: ${{ github.event.inputs.custom_image }}"
         else
-          echo "❌ ERROR: No image available to deploy!"
-          exit 1
+          echo "image=${{ needs.build-and-push.outputs.full_image }}" >> $GITHUB_OUTPUT
+          echo "📦 Using built image: ${{ needs.build-and-push.outputs.full_image }}"
         fi
-    
-    - name: Validate image output
-      run: |
-        if [ -z "${{ steps.deploy_image.outputs.image }}" ]; then
-          echo "❌ ERROR: Image output is empty!"
-          echo "Debug info:"
-          echo "  build-and-push.outputs.full_image: ${{ needs.build-and-push.outputs.full_image }}"
-          echo "  custom_image input: ${{ github.event.inputs.custom_image }}"
-          exit 1
-        fi
-        echo "✅ Image validated: ${{ steps.deploy_image.outputs.image }}"
-    
-    - name: Extract image tag
-      id: image_tag
-      run: |
-        image="${{ steps.deploy_image.outputs.image }}"
-        echo "📦 Full image: ${image}"
-        
-        if [[ "$image" == *:* ]]; then
-          tag="${image##*:}"
-        else
-          tag="latest"
-          echo "⚠️  No tag found, defaulting to: latest"
-        fi
-        
-        echo "tag=${tag}" >> $GITHUB_OUTPUT
-        echo "🏷️  Extracted tag: ${tag}"
-    
-    - name: Set IMAGE_VERSION app setting via REST API
-      run: |
-        # Extrair username e password do publish-profile
-        USERNAME=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP '(?<=userName=")[^"]+' | head -1)
-        PASSWORD=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP '(?<=userPWD=")[^"]+' | head -1)
-        
-        WEBAPP_NAME="${{ secrets.AZURE_WEBAPP_NAME }}"
-        TAG="${{ steps.image_tag.outputs.tag }}"
-        
-        echo "🔧 Setting IMAGE_VERSION to: ${TAG}"
-        
-        # Fazer requisição para API do Azure Web App
-        curl -X POST \
-          "https://${WEBAPP_NAME}.scm.azurewebsites.net/api/settings" \
-          -u "${USERNAME}:${PASSWORD}" \
-          -H "Content-Type: application/json" \
-          -d '{"IMAGE_VERSION":"'"${TAG}"'"}' \
-          --fail
-        
-        echo "✅ IMAGE_VERSION set to: ${TAG}"
     
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
@@ -216,5 +146,5 @@ jobs:
         echo "📦 Imagem deployada:"
         echo "   ${{ steps.deploy_image.outputs.image }}"
         echo ""
-        echo "🏷️  Versão: ${{ steps.image_tag.outputs.tag }}"
+        echo "🏷️  Versão: ${{ needs.build-and-push.outputs.version }}"
         echo "=================================="
