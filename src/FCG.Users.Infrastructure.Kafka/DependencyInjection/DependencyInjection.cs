@@ -33,6 +33,10 @@ namespace FCG.Users.Infrastructure.Kafka.DependencyInjection
                 var producerConfig = new ProducerConfig
                 {
                     BootstrapServers = settings.BootstrapServers,
+                    SecurityProtocol = SecurityProtocol.SaslSsl,
+                    SaslMechanism = SaslMechanism.Plain,
+                    SaslUsername = settings.SaslUsername,
+                    SaslPassword = settings.SaslPassword,
                     Acks = Acks.All,
                     EnableIdempotence = true,
                     MaxInFlight = 5,

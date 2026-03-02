@@ -7,5 +7,7 @@ namespace FCG.Users.Infrastructure.Kafka.Settings
     {
         public string BootstrapServers { get; init; } = string.Empty;
         public string UserCreatedTopic { get; init; } = string.Empty;
+        public string SaslUsername { get; init; } = string.Empty;
+        public string SaslPassword { get; init; } = string.Empty;
     }
 }
