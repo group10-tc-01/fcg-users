@@ -24,6 +24,8 @@ namespace FCG.Users.Infrastructure.Kafka.DependencyInjection
 
             var kafkaSettings = configuration.GetSection("KafkaSettings").Get<KafkaSettings>();
 
+            ValidateKafkaSettings(kafkaSettings!);
+
             services.AddSingleton(kafkaSettings!);
 
             services.AddSingleton<IMessageProducer>(sp =>
@@ -33,20 +35,36 @@ namespace FCG.Users.Infrastructure.Kafka.DependencyInjection
                 var producerConfig = new ProducerConfig
                 {
                     BootstrapServers = settings.BootstrapServers,
-                    SecurityProtocol = SecurityProtocol.SaslSsl,
-                    SaslMechanism = SaslMechanism.Plain,
-                    SaslUsername = settings.SaslUsername,
-                    SaslPassword = settings.SaslPassword,
                     Acks = Acks.All,
                     EnableIdempotence = true,
                     MaxInFlight = 5,
                     MessageSendMaxRetries = 3
                 };
 
+                if (settings.UseSaslSsl)
+                {
+                    producerConfig.SecurityProtocol = SecurityProtocol.SaslSsl;
+                    producerConfig.SaslMechanism = SaslMechanism.Plain;
+                    producerConfig.SaslUsername = settings.SaslUsername;
+                    producerConfig.SaslPassword = settings.SaslPassword;
+                }
+
                 return new KafkaProducer(producerConfig, logger);
             });
 
             return services;
+        }
+
+        private static void ValidateKafkaSettings(KafkaSettings settings)
+        {
+            if (settings.UseSaslSsl)
+            {
+                if (string.IsNullOrWhiteSpace(settings.SaslUsername))
+                    throw new InvalidOperationException("KafkaSettings:SaslUsername must be configured when UseSaslSsl is true.");
+
+                if (string.IsNullOrWhiteSpace(settings.SaslPassword))
+                    throw new InvalidOperationException("KafkaSettings:SaslPassword must be configured when UseSaslSsl is true.");
+            }
         }
     }
 }
