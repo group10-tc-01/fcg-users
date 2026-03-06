@@ -4,6 +4,7 @@ using FCG.Users.WebApi.Filters;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace FCG.Users.WebApi.DependencyInjection
 {
@@ -12,13 +13,21 @@ namespace FCG.Users.WebApi.DependencyInjection
     {
         public static IServiceCollection AddWebApi(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddControllers()
+                   .AddJsonOptions(options =>
+                   {
+                       options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                   });
+
+            services.AddEndpointsApiExplorer();
+            services.AddHttpContextAccessor();
+            services.AddSwaggerConfiguration(configuration);
+
             services.AddVersioning();
             services.AddFilters();
             services.AddHealthChecks().AddDbContextCheck<FcgUserDbContext>();
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddSwaggerConfiguration(configuration);
             services.AddSerilogLogging(configuration);
-
             return services;
         }
 
