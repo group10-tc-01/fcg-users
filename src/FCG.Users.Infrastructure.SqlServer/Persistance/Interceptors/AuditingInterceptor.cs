@@ -9,16 +9,10 @@ using System.Text.Json;
 
 namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
 {
-    public class AuditingInterceptor : SaveChangesInterceptor
+    public class AuditingInterceptor(ICurrentSessionProvider currentSessionProvider, ILogger<AuditingInterceptor> logger) : SaveChangesInterceptor
     {
-        private readonly ICurrentSessionProvider _currentSessionProvider;
-        private readonly ILogger<AuditingInterceptor> _logger;
-
-        public AuditingInterceptor(ICurrentSessionProvider currentSessionProvider, ILogger<AuditingInterceptor> logger)
-        {
-            _currentSessionProvider = currentSessionProvider;
-            _logger = logger;
-        }
+        private readonly ICurrentSessionProvider _currentSessionProvider = currentSessionProvider;
+        private readonly ILogger<AuditingInterceptor> _logger = logger;
 
         public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
             DbContextEventData eventData,
@@ -104,7 +98,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
                 values[property.Metadata.Name] = value;
             }
 
-            return values.Any() ? JsonSerializer.Serialize(values) : string.Empty;
+            return values.Count > 0 ? JsonSerializer.Serialize(values) : string.Empty;
         }
 
         private static string GetChangedColumnsAsJson(EntityEntry<BaseEntity> entry)
@@ -114,7 +108,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
                 .Select(p => p.Metadata.Name)
                 .ToList();
 
-            return changedColumns.Any() ? JsonSerializer.Serialize(changedColumns) : string.Empty;
+            return changedColumns.Count > 0 ? JsonSerializer.Serialize(changedColumns) : string.Empty;
         }
     }
 }
