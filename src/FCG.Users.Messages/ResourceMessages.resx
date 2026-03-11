@@ -222,4 +222,7 @@
   <data name="RefreshTokenDefaultReason" xml:space="preserve">
     <value>New refresh token generated.</value>
   </data>
+  <data name="UserUpdatePasswordUpdateAtIsNull" xml:space="preserve">
+    <value>Looks up a localized string similar to Failed to record the password update timestamp. Please try again..</value>
+  </data>
 </root>

@@ -24,7 +24,8 @@ namespace FCG.Users.UnitTests.Domain.Users
             user.Role.Should().Be(Role.User);
             user.RefreshTokens.Should().BeNullOrEmpty();
             user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
-            user.UpdatedAt.TimeOfDay.Should().Be(TimeSpan.Zero);
+            user.UpdatedAt.Should().HaveValue();
+            user.UpdatedAt.Value.TimeOfDay.Should().Be(TimeSpan.Zero);
             user.IsActive.Should().BeTrue();
         }
 
@@ -45,7 +46,8 @@ namespace FCG.Users.UnitTests.Domain.Users
             user.Role.Should().Be(Role.Admin);
             user.RefreshTokens.Should().BeNullOrEmpty();
             user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
-            user.UpdatedAt.TimeOfDay.Should().Be(TimeSpan.Zero);
+            user.UpdatedAt.Should().HaveValue();
+            user.UpdatedAt!.Value.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
             user.IsActive.Should().BeTrue();
         }
 

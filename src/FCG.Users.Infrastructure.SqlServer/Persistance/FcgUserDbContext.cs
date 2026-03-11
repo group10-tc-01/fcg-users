@@ -1,6 +1,7 @@
 ﻿using FCG.Users.Domain.Abstractions;
 using FCG.Users.Domain.RefreshTokens;
 using FCG.Users.Domain.Users;
+using FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -12,13 +13,25 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance
     public class FcgUserDbContext : DbContext, IUnitOfWork
     {
         private readonly IPublisher _publisher;
+        private readonly AuditingInterceptor _auditingInterceptor;
 
         public DbSet<User> User { get; set; }
         public DbSet<RefreshToken> RefreshToken { get; set; }
+        public DbSet<AuditTrail> AuditTrail { get; set; }
 
-        public FcgUserDbContext(DbContextOptions<FcgUserDbContext> options, IPublisher publisher) : base(options)
+        public FcgUserDbContext(
+            DbContextOptions<FcgUserDbContext> options,
+            IPublisher publisher,
+            AuditingInterceptor auditingInterceptor) : base(options)
         {
             _publisher = publisher;
+            _auditingInterceptor = auditingInterceptor;
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.AddInterceptors(_auditingInterceptor);
+            base.OnConfiguring(optionsBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

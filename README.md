@@ -420,3 +420,105 @@ Serviços disponíveis:
 - 📊 **Seq (Logs)**: `http://localhost:5341`
 - 📨 **Kafka**: `localhost:9092`
 - 🎛️ **Kafka UI**: `http://localhost:8080`
+
+---
+
+## 📊 Auditoria
+
+A aplicação implementa um sistema de auditoria automático que rastreia todas as mudanças nas entidades auditáveis.
+
+### Tabela `AuditTrails`
+```sql
+CREATE TABLE audit_trails ( 
+    Id UNIQUEIDENTIFIER PRIMARY KEY, 
+    UserId UNIQUEIDENTIFIER NULL, 
+    EntityName NVARCHAR(100) NOT NULL, 
+    PrimaryKey NVARCHAR(100) NOT NULL, 
+    TrailType NVARCHAR(20) NOT NULL, 
+    DateUtc DATETIMEOFFSET NOT NULL, 
+    OldValues NVARCHAR(MAX), 
+    NewValues NVARCHAR(MAX), 
+    ChangedColumns NVARCHAR(MAX),
+    INDEX IX_AuditTrails_EntityName (EntityName)
+);
+```
+
+**Campos:**
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `Id` | UNIQUEIDENTIFIER | Identificador único do registro de auditoria |
+| `UserId` | UNIQUEIDENTIFIER (NULL) | ID do usuário que realizou a ação |
+| `EntityName` | NVARCHAR(100) | Nome da entidade modificada (ex: User) |
+| `PrimaryKey` | NVARCHAR(100) | ID (PK) da entidade modificada |
+| `TrailType` | NVARCHAR(20) | Tipo de operação: Create, Update ou Delete |
+| `DateUtc` | DATETIMEOFFSET | Data/hora (UTC) da operação |
+| `OldValues` | NVARCHAR(MAX) | JSON com valores anteriores (atualização/exclusão) |
+| `NewValues` | NVARCHAR(MAX) | JSON com valores novos (criação/atualização) |
+| `ChangedColumns` | NVARCHAR(MAX) | JSON com lista de colunas modificadas |
+
+### Como Acessar os Registros de Auditoria
+
+#### 1️º Listar todos os registros de auditoria
+```sql
+SELECT * FROM dbo.audit_trails ORDER BY DateUtc DESC;
+```
+
+#### 2️º Filtrar por entidade
+```sql
+SELECT * FROM dbo.audit_trails WHERE EntityName = 'User' ORDER BY DateUtc DESC;
+```
+
+#### 3️º Filtrar por usuário
+```sql
+SELECT * FROM dbo.audit_trails WHERE UserId = '7b9e2c1a-8f4d-4e5b-9c3d-1a2b3c4d5e6f' ORDER BY DateUtc DESC;
+```
+
+#### 4️º Filtrar por tipo de operação
+```sql
+SELECT * FROM dbo.audit_trails WHERE TrailType = 'Update' AND DateUtc >= GETUTCDATE() - 1 ORDER BY DateUtc DESC;
+```
+
+#### 5️º Analisar mudanças de um usuário específico
+```sql
+SELECT PrimaryKey, TrailType, DateUtc, CAST(OldValues AS NVARCHAR(MAX)) AS OldValues, CAST(NewValues AS NVARCHAR(MAX)) AS NewValues, CAST(ChangedColumns AS NVARCHAR(MAX)) AS ChangedColumns FROM dbo.audit_trails WHERE EntityName = 'User' AND PrimaryKey = '3fa85f64-5717-4562-b3fc-2c963f66afa6' ORDER BY DateUtc DESC
+```
+
+### Exemplo de Dados em Auditoria
+
+**Atualização de Senha:**
+```
+{ "Id": "a1b2c3d4-e5f6-4a5b-9c8d-7e6f5a4b3c2d", "UserId": "7b9e2c1a-8f4d-4e5b-9c3d-1a2b3c4d5e6f", "EntityName": "User", "PrimaryKey": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "TrailType": "Update", "DateUtc": "2026-01-18T15:45:30.1234567Z", "OldValues": "{"Password":"$2a$11$OldHashedPassword..."}", "NewValues": "{"Password":"$2a$11$NewHashedPassword...","UpdatedAt":"2026-01-18T15:45:30.1234567Z"}", "ChangedColumns": "["Password","UpdatedAt"]" }
+```
+
+**Interpretação:**
+- Usuário 7b9e2c1a-8f4d-4e5b-9c3d-1a2b3c4d5e6f atualizou a senha
+- Entidade User com ID 3fa85f64-5717-4562-b3fc-2c963f66afa6 foi modificada
+- Colunas alteradas: Password e UpdatedAt
+- Timestamp UTC de quando a ação ocorreu
+
+### Entidades Auditadas
+
+Apenas entidades que implementam `IAuditableEntity` são auditadas:
+
+| Entidade     | Auditada |
+|--------------|----------|
+| User         |  ✅ Sim  |
+| RefreshToken |  ❌ Não  |
+
+**Para adicionar auditoria a uma nova entidade:**
+```
+public sealed class MinhaEntidade : BaseEntity, IAuditableEntity { 
+    // ... propriedades
+
+    // Implementação explícita da interface
+    DateTime IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value; }
+    DateTime? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value; }
+    string IAuditableEntity.CreatedBy { get => CreatedBy; set => CreatedBy = value; }
+    string? IAuditableEntity.UpdatedBy { get => UpdatedBy; set => UpdatedBy = value; }
+}
+```
+
+## 📚 Referências
+- [Artigo](https://blog.elmah.io/implementing-audit-logs-in-ef-core-without-polluting-your-entities/)
+---
