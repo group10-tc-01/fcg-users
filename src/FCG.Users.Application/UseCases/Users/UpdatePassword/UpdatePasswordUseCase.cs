@@ -51,7 +51,10 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
 
             _logger.LogInformation("[UpdateUserUseCase] Successfully updated password for user: {UserId}", user.Id);
 
-            return new UpdatePasswordResponse(user.Id, user.UpdatedAt);
+            if (user.UpdatedAt == null)
+                throw new DomainException(ResourceMessages.UserUpdatePasswordUpdateAtIsNull);
+
+            return new UpdatePasswordResponse(user.Id, user.UpdatedAt.Value);
         }
     }
 }
