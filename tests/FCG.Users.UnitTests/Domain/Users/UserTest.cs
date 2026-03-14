@@ -91,9 +91,9 @@ namespace FCG.Users.UnitTests.Domain.Users
             // Assert
             domainEvents.Should().NotBeNull();
             domainEvents.Should().HaveCount(1);
-            domainEvents.First().Should().BeOfType<UserCreatedDomainEvent>();
+            domainEvents[0].Should().BeOfType<UserCreatedDomainEvent>();
 
-            var userCreatedEvent = domainEvents.First() as UserCreatedDomainEvent;
+            var userCreatedEvent = domainEvents[0] as UserCreatedDomainEvent;
             userCreatedEvent!.UserId.Should().Be(user.Id);
             userCreatedEvent.Name.Should().Be(userBuilder.Name);
             userCreatedEvent.Email.Should().Be(userBuilder.Email);

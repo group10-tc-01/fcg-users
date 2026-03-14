@@ -110,10 +110,10 @@ namespace FCG.Users.IntegratedTests.Configurations
 
             CreatedAdminUser = CreateAdminUser(context);
             CreatedUsers = CreateUser(context, itemsQuantity);
-            CreatedRefreshTokens = CreateRefreshTokens(context, CreatedUsers.ToList());
+            CreatedRefreshTokens = CreateRefreshTokens(context, [.. CreatedUsers]);
         }
 
-        private User CreateAdminUser(FcgUserDbContext context)
+        private static User CreateAdminUser(FcgUserDbContext context)
         {
             var adminUser = User.CreateAdminUser("Admin User", "admin@fcgusers.com", "Admin@123");
             context.User.Add(adminUser);
@@ -122,7 +122,7 @@ namespace FCG.Users.IntegratedTests.Configurations
             return adminUser;
         }
 
-        private List<User> CreateUser(FcgUserDbContext context, int itemsQuantity)
+        private static List<User> CreateUser(FcgUserDbContext context, int itemsQuantity)
         {
             var users = new List<User>();
 

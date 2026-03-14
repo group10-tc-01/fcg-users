@@ -1,11 +1,13 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
 namespace FCG.Users.Infrastructure.SqlServer.Migrations
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public partial class AddAuditTrailTable : Migration
     {
         /// <inheritdoc />

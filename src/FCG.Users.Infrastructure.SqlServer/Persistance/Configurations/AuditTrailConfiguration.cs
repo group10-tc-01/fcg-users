@@ -1,9 +1,11 @@
 ﻿using FCG.Users.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.Infrastructure.SqlServer.Persistance.Configurations
 {
+    [ExcludeFromCodeCoverage]
     public class AuditTrailConfiguration : IEntityTypeConfiguration<AuditTrail>
     {
         public void Configure(EntityTypeBuilder<AuditTrail> builder)
