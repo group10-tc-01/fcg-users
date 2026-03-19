@@ -3,7 +3,7 @@ using FCG.Users.Domain.Users;
 
 namespace FCG.Users.Domain.RefreshTokens
 {
-    public sealed class RefreshToken : BaseEntity
+    public sealed class RefreshToken : BaseEntity, IAuditableEntity
     {
         public string Token { get; private set; } = string.Empty;
         public Guid UserId { get; private set; }

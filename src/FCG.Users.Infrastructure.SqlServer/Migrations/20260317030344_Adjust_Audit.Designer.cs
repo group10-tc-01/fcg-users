@@ -4,6 +4,7 @@ using FCG.Users.Infrastructure.SqlServer.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FCG.Users.Infrastructure.SqlServer.Migrations
 {
     [DbContext(typeof(FcgUserDbContext))]
-    partial class FcgUserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260317030344_Adjust_Audit")]
+    partial class Adjust_Audit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
