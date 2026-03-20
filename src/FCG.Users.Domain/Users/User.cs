@@ -5,13 +5,21 @@ using FCG.Users.Domain.Users.ValueObjects;
 
 namespace FCG.Users.Domain.Users
 {
-    public sealed class User : BaseEntity
+    public sealed class User : BaseEntity, IAuditableEntity
     {
         public Name Name { get; private set; } = null!;
         public Email Email { get; private set; } = null!;
         public Password Password { get; private set; } = null!;
         public Role Role { get; private set; }
         public ICollection<RefreshToken>? RefreshTokens { get; }
+
+        #region Audits properties
+        // Implementação explícita - expõe via interface, mas mantém protected set
+        DateTime IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value; }
+        DateTime? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value; }
+        string IAuditableEntity.CreatedBy { get => CreatedBy; set => CreatedBy = value; }
+        string? IAuditableEntity.UpdatedBy { get => UpdatedBy; set => UpdatedBy = value; }
+        #endregion
 
         public static User CreateRegularUser(string name, string email, string password)
         {

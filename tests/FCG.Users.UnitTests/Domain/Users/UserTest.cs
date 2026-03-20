@@ -24,7 +24,7 @@ namespace FCG.Users.UnitTests.Domain.Users
             user.Role.Should().Be(Role.User);
             user.RefreshTokens.Should().BeNullOrEmpty();
             user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
-            user.UpdatedAt.TimeOfDay.Should().Be(TimeSpan.Zero);
+            user.UpdatedAt.Should().BeNull();  // ← UpdatedAt é null na criação
             user.IsActive.Should().BeTrue();
         }
 
@@ -45,7 +45,7 @@ namespace FCG.Users.UnitTests.Domain.Users
             user.Role.Should().Be(Role.Admin);
             user.RefreshTokens.Should().BeNullOrEmpty();
             user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
-            user.UpdatedAt.TimeOfDay.Should().Be(TimeSpan.Zero);
+            user.UpdatedAt.Should().BeNull();  // ← UpdatedAt é null na criação
             user.IsActive.Should().BeTrue();
         }
 
@@ -91,9 +91,9 @@ namespace FCG.Users.UnitTests.Domain.Users
             // Assert
             domainEvents.Should().NotBeNull();
             domainEvents.Should().HaveCount(1);
-            domainEvents.First().Should().BeOfType<UserCreatedDomainEvent>();
+            domainEvents[0].Should().BeOfType<UserCreatedDomainEvent>();
 
-            var userCreatedEvent = domainEvents.First() as UserCreatedDomainEvent;
+            var userCreatedEvent = domainEvents[0] as UserCreatedDomainEvent;
             userCreatedEvent!.UserId.Should().Be(user.Id);
             userCreatedEvent.Name.Should().Be(userBuilder.Name);
             userCreatedEvent.Email.Should().Be(userBuilder.Email);

@@ -3,6 +3,7 @@ using FCG.Users.Infrastructure.SqlServer.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -11,11 +12,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.Infrastructure.SqlServer.Migrations
 {
-    [ExcludeFromCodeCoverage]
     [DbContext(typeof(FcgUserDbContext))]
-    partial class FcgUserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311004730_AddAuditTrailTable")]
+    partial class AddAuditTrailTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,6 +32,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ChangedColumns")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("DateUtc")
@@ -41,9 +44,11 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("NewValues")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OldValues")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PrimaryKey")
