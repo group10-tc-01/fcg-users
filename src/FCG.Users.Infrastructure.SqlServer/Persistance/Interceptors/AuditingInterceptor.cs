@@ -9,7 +9,7 @@ using System.Text.Json;
 
 namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
 {
-    public class AuditingInterceptor(ICurrentSessionProvider currentSessionProvider, ILogger<AuditingInterceptor> logger) : SaveChangesInterceptor
+    public sealed class AuditingInterceptor(ICurrentSessionProvider currentSessionProvider, ILogger<AuditingInterceptor> logger) : SaveChangesInterceptor
     {
         public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
             DbContextEventData eventData,
@@ -97,16 +97,14 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
             foreach (var (nav, ownedEntry) in ownedEntries)
             {
                 foreach (var prop in ownedEntry.Properties)
-            {
+                {
                     if (prop.IsTemporary || prop.Metadata.IsForeignKey() || prop.Metadata.IsPrimaryKey())
                         continue;
 
-                    var original = ResolveOriginalValue(entry, prop);
+                    if (!includeAll && Equals(prop.OriginalValue, prop.CurrentValue))
+                        continue;
 
-                    if (!includeAll && Equals(original, prop.CurrentValue))
-                    continue;
-
-                    values[PropertyName(nav, prop)] = useOriginalValues ? original : prop.CurrentValue;
+                    values[PropertyName(nav, prop)] = useOriginalValues ? prop.OriginalValue : prop.CurrentValue;
                 }
             }
 
@@ -129,20 +127,11 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
             {
                 changed.AddRange(ownedEntry.Properties
                     .Where(p => !p.IsTemporary && !p.Metadata.IsForeignKey() && !p.Metadata.IsPrimaryKey()
-                                && !Equals(ResolveOriginalValue(entry, p), p.CurrentValue))
+                                && !Equals(p.OriginalValue, p.CurrentValue))
                     .Select(p => PropertyName(nav, p)));
             }
 
             return changed.Count > 0 ? JsonSerializer.Serialize(changed) : string.Empty;
-        }
-
-        private static object? ResolveOriginalValue(EntityEntry ownerEntry, PropertyEntry ownedProperty)
-        {
-            if (!Equals(ownedProperty.OriginalValue, ownedProperty.CurrentValue))
-                return ownedProperty.OriginalValue;
-
-            try { return ownerEntry.OriginalValues[ownedProperty.Metadata]; }
-            catch { return ownedProperty.OriginalValue; }
         }
 
         private static IReadOnlyCollection<(string Nav, EntityEntry E)> GetOwnedEntries(EntityEntry<BaseEntity> ownerEntry)

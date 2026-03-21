@@ -33,7 +33,7 @@ namespace FCG.Users.Domain.Users
 
         public void UpdatePassword(string password)
         {
-            Password = Password.CreateFromHash(password);
+            Password.ChangeHash(password);
             UpdatedAt = DateTime.UtcNow;
         }
 
