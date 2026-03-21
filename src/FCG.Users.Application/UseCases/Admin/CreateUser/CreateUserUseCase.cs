@@ -6,7 +6,7 @@ using FCG.Users.Messages;
 
 namespace FCG.Users.Application.UseCases.Admin.CreateUser
 {
-    public class CreateUserUseCase : ICreateUserUseCase
+    public sealed class CreateUserUseCase : ICreateUserUseCase
     {
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
