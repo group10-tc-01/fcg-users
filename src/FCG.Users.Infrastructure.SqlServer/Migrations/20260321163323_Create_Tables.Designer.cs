@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FCG.Users.Infrastructure.SqlServer.Migrations
 {
     [DbContext(typeof(FcgUserDbContext))]
-    [Migration("20260317030344_Adjust_Audit")]
-    partial class Adjust_Audit
+    [Migration("20260321163323_Create_Tables")]
+    partial class Create_Tables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
