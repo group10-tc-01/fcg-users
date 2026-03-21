@@ -2,7 +2,11 @@
 using FCG.Users.Infrastructure.SqlServer.Persistance;
 using FCG.Users.WebApi.Filters;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
 using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
@@ -28,12 +32,58 @@ namespace FCG.Users.WebApi.DependencyInjection
             services.AddHealthChecks().AddDbContextCheck<FcgUserDbContext>();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddSerilogLogging(configuration);
+            services.AddObservability(configuration);
+
             return services;
+        }
+
+        private static void AddObservability(this IServiceCollection services, IConfiguration configuration)
+        {
+            var tempoEndpoint = configuration["Observability:TempoEndpoint"];
+            var serviceName = "FCG.Users";
+
+            services.AddOpenTelemetry()
+                .ConfigureResource(resource => resource
+                    .AddService(serviceName))
+                .WithTracing(tracing => tracing
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter(otlp =>
+                    {
+                        otlp.Endpoint = new Uri(tempoEndpoint);
+                    }))
+                .WithMetrics(metrics => metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddPrometheusExporter());
+        }
+
+        private static void AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)
+        {
+            var lokiUrl = configuration["Observability:LokiUrl"];
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.FromLogContext()
+                .Enrich.WithMachineName()
+                .Enrich.WithProperty("Application", "FCG.Users")
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.GrafanaLoki(lokiUrl)
+                .CreateLogger();
+
+            Log.Information("Starting FCG.Users application");
+            Log.Information("Loki URL configured: {LokiUrl}", lokiUrl);
+            Log.Information("Environment: {Environment}", configuration["ASPNETCORE_ENVIRONMENT"]);
+
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddSerilog();
+            });
         }
 
         private static void AddSwaggerConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -93,30 +143,6 @@ namespace FCG.Users.WebApi.DependencyInjection
             services.AddMvc(options =>
             {
                 options.Filters.Add<TrimStringsActionFilter>();
-            });
-        }
-
-        private static void AddSerilogLogging(this IServiceCollection services, IConfiguration configuration)
-        {
-            var seqUrl = configuration["Serilog:WriteTo:1:Args:serverUrl"] ?? configuration["Serilog:SeqUrl"] ?? "http://localhost:5341";
-
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .Enrich.FromLogContext()
-                .Enrich.WithMachineName()
-                .Enrich.WithProperty("Application", "FCG.Users")
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
-                .WriteTo.Seq(seqUrl)
-                .CreateLogger();
-
-            Log.Information("Starting FCG.Users application");
-            Log.Information("Seq URL configured: {SeqUrl}", seqUrl);
-            Log.Information("Environment: {Environment}", configuration["ASPNETCORE_ENVIRONMENT"]);
-
-            services.AddLogging(loggingBuilder =>
-            {
-                loggingBuilder.ClearProviders();
-                loggingBuilder.AddSerilog();
             });
         }
     }

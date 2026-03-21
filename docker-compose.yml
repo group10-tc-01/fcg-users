@@ -20,17 +20,74 @@ services:
             retries: 10
             start_period: 10s
 
-    seq:
-        image: datalust/seq:latest
-        container_name: seq-fcg-users
-        environment:
-            - ACCEPT_EULA=Y
-            - SEQ_FIRSTRUN_ADMINPASSWORD=YourPassword123
+    loki:
+        image: grafana/loki:latest
+        container_name: loki-fcg-users
         ports:
-            - "5341:5341"
-            - "5342:80"
+            - "3100:3100"
+        command: -config.file=/etc/loki/local-config.yaml
+        configs:
+            - source: loki_config
+              target: /etc/loki/local-config.yaml
+        volumes:
+            - loki_data:/loki
         networks:
             - network-fcg
+
+    tempo:
+        image: grafana/tempo:latest
+        container_name: tempo-fcg-users
+        user: root
+        ports:
+            - "3200:3200"
+            - "4317:4317"
+        command: -config.file=/etc/tempo/tempo-config.yaml
+        configs:
+            - source: tempo_config
+              target: /etc/tempo/tempo-config.yaml
+        volumes:
+            - tempo_data:/tmp/tempo
+        networks:
+            - network-fcg
+
+    prometheus:
+        image: prom/prometheus:latest
+        container_name: prometheus-fcg-users
+        ports:
+            - "9090:9090"
+        command:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.retention.time=7d
+        configs:
+            - source: prometheus_config
+              target: /etc/prometheus/prometheus.yml
+        volumes:
+            - prometheus_data:/prometheus
+        networks:
+            - network-fcg
+        depends_on:
+            - fcg-users
+
+    grafana:
+        image: grafana/grafana:latest
+        container_name: grafana-fcg-users
+        ports:
+            - "3000:3000"
+        environment:
+            - GF_AUTH_ANONYMOUS_ENABLED=true
+            - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+            - GF_AUTH_DISABLE_LOGIN_FORM=true
+        configs:
+            - source: grafana_datasources
+              target: /etc/grafana/provisioning/datasources/datasources.yaml
+        volumes:
+            - grafana_data:/var/lib/grafana
+        networks:
+            - network-fcg
+        depends_on:
+            - loki
+            - tempo
+            - prometheus
 
     fcg-users:
         build:
@@ -40,7 +97,9 @@ services:
         depends_on:
             sqlserver:
                 condition: service_healthy
-            seq:
+            loki:
+                condition: service_started
+            tempo:
                 condition: service_started
             kafka:
                 condition: service_healthy
@@ -59,11 +118,6 @@ services:
             timeout: 10s
             retries: 3
             start_period: 40s
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "10m"
-                max-file: "3"
 
     zookeeper:
         image: confluentinc/cp-zookeeper:7.5.0
@@ -124,11 +178,100 @@ services:
         networks:
             - network-fcg
 
+configs:
+    loki_config:
+        content: |
+            auth_enabled: false
+            server:
+              http_listen_port: 3100
+            common:
+              ring:
+                instance_addr: 127.0.0.1
+                kvstore:
+                  store: inmemory
+              replication_factor: 1
+              path_prefix: /loki
+            schema_config:
+              configs:
+                - from: 2020-10-24
+                  store: tsdb
+                  object_store: filesystem
+                  schema: v13
+                  index:
+                    prefix: index_
+                    period: 24h
+            storage_config:
+              filesystem:
+                directory: /loki/chunks
+            limits_config:
+              reject_old_samples: true
+              reject_old_samples_max_age: 168h
+
+    tempo_config:
+        content: |
+            server:
+              http_listen_port: 3200
+            distributor:
+              receivers:
+                otlp:
+                  protocols:
+                    grpc:
+                      endpoint: 0.0.0.0:4317
+            storage:
+              trace:
+                backend: local
+                local:
+                  path: /tmp/tempo/blocks
+                wal:
+                  path: /tmp/tempo/wal
+
+    prometheus_config:
+        content: |
+            global:
+              scrape_interval: 15s
+              evaluation_interval: 15s
+            scrape_configs:
+              - job_name: 'fcg-users'
+                static_configs:
+                  - targets: ['fcg-users:8080']
+                metrics_path: '/metrics'
+
+    grafana_datasources:
+        content: |
+            apiVersion: 1
+            datasources:
+              - name: Loki
+                type: loki
+                access: proxy
+                url: http://loki:3100
+                isDefault: false
+              - name: Prometheus
+                type: prometheus
+                access: proxy
+                url: http://prometheus:9090
+                isDefault: true
+              - name: Tempo
+                type: tempo
+                access: proxy
+                url: http://tempo:3200
+                isDefault: false
+                jsonData:
+                  tracesToLogsV2:
+                    datasourceUid: loki
+                    filterByTraceID: true
+                    filterBySpanID: true
+                  nodeGraph:
+                    enabled: true
+
 volumes:
     sqlserver_data:
     zookeeper_data:
     zookeeper_logs:
     kafka_data:
+    loki_data:
+    tempo_data:
+    prometheus_data:
+    grafana_data:
 
 networks:
     network-fcg:

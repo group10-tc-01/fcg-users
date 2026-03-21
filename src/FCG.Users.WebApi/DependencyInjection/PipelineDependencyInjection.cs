@@ -35,17 +35,17 @@ namespace FCG.Users.WebApi.DependencyInjection
                     [HealthStatus.Healthy] = StatusCodes.Status200OK,
                     [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable,
                 }
-
             });
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
+            app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
             app.MapControllers();
 
             return app;
         }
-
     }
 }
