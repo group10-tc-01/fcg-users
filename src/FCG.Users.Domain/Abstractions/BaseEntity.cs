@@ -7,11 +7,6 @@
         public DateTime? UpdatedAt { get; protected set; }
         public bool IsActive { get; protected set; } = true;
 
-        #region Audits properties
-        public string CreatedBy { get; protected set; } = string.Empty;
-        public string? UpdatedBy { get; protected set; }
-        #endregion
-
         public void Activate()
         {
             IsActive = true;
