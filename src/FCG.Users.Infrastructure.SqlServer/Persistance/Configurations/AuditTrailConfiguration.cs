@@ -21,7 +21,6 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Configurations
             builder.Property(e => e.DateUtc).IsRequired();
             builder.Property(e => e.TrailType).HasConversion<string>();
 
-            // Apenas propriedades string, sem conversão
             builder.Property(e => e.OldValues).IsRequired(false);
             builder.Property(e => e.NewValues).IsRequired(false);
             builder.Property(e => e.ChangedColumns).IsRequired(false);

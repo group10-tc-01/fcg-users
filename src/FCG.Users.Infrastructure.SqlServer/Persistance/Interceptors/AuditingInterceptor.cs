@@ -22,7 +22,7 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
 
                 foreach (var entry in GetAuditEntries(context))
                     context.AuditTrail.Add(entry);
-            }
+                }
 
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
@@ -97,14 +97,14 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
             foreach (var (nav, ownedEntry) in ownedEntries)
             {
                 foreach (var prop in ownedEntry.Properties)
-                {
+            {
                     if (prop.IsTemporary || prop.Metadata.IsForeignKey() || prop.Metadata.IsPrimaryKey())
                         continue;
 
                     var original = ResolveOriginalValue(entry, prop);
 
                     if (!includeAll && Equals(original, prop.CurrentValue))
-                        continue;
+                    continue;
 
                     values[PropertyName(nav, prop)] = useOriginalValues ? original : prop.CurrentValue;
                 }
