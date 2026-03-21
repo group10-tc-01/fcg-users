@@ -1,15 +1,14 @@
 ﻿namespace FCG.Users.Domain.Abstractions
 {
-    public class AuditTrail
+    public sealed class AuditTrail
     {
         public Guid Id { get; private set; }
-        public Guid? UserId { get; private set; }
+        public Guid? PerformedByUserId { get; private set; }
         public string EntityName { get; private set; } = string.Empty;
         public string? PrimaryKey { get; private set; }
         public AuditTrailType TrailType { get; private set; }
         public DateTimeOffset DateUtc { get; private set; }
 
-        // Mude para string JSON em vez de Dictionary/List
         public string OldValues { get; private set; } = string.Empty;
         public string NewValues { get; private set; } = string.Empty;
         public string ChangedColumns { get; private set; } = string.Empty;
@@ -17,7 +16,7 @@
         private AuditTrail() { }
 
         public AuditTrail(
-            Guid? userId,
+            Guid? performedByUserId,
             string entityName,
             string? primaryKey,
             AuditTrailType trailType,
@@ -26,7 +25,7 @@
             string changedColumns = "")
         {
             Id = Guid.NewGuid();
-            UserId = userId;
+            PerformedByUserId = performedByUserId;
             EntityName = entityName;
             PrimaryKey = primaryKey;
             TrailType = trailType;

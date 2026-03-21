@@ -1,4 +1,4 @@
-﻿using FCG.Users.Application.Abstractions;
+using FCG.Users.Application.Abstractions;
 using FCG.Users.Application.Abstractions.Audit;
 using FCG.Users.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +9,8 @@ using System.Text.Json;
 
 namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
 {
-    public class AuditingInterceptor(ICurrentSessionProvider currentSessionProvider, ILogger<AuditingInterceptor> logger) : SaveChangesInterceptor
+    public sealed class AuditingInterceptor(ICurrentSessionProvider currentSessionProvider, ILogger<AuditingInterceptor> logger) : SaveChangesInterceptor
     {
-        private readonly ICurrentSessionProvider _currentSessionProvider = currentSessionProvider;
-        private readonly ILogger<AuditingInterceptor> _logger = logger;
-
         public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
             DbContextEventData eventData,
             InterceptionResult<int> result,
@@ -21,13 +18,11 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
         {
             if (eventData.Context is FcgUserDbContext context)
             {
-                var auditEntries = GetAuditEntries(context);
+                context.ChangeTracker.DetectChanges();
 
-                foreach (var entry in auditEntries)
-                {
+                foreach (var entry in GetAuditEntries(context))
                     context.AuditTrail.Add(entry);
                 }
-            }
 
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
@@ -35,18 +30,16 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
         private List<AuditTrail> GetAuditEntries(FcgUserDbContext context)
         {
             var auditEntries = new List<AuditTrail>();
-            var userId = _currentSessionProvider.GetUserId();
+            var userId = currentSessionProvider.GetUserId();
 
             foreach (var entry in context.ChangeTracker.Entries<BaseEntity>())
             {
                 if (entry.Entity is not IAuditableEntity)
                     continue;
 
-                if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                if (entry.State is EntityState.Detached or EntityState.Unchanged)
                     continue;
 
-                var entityName = entry.Entity.GetType().Name;
-                var primaryKey = entry.Entity.Id.ToString();
                 var trailType = entry.State switch
                 {
                     EntityState.Added => AuditTrailType.Create,
@@ -57,58 +50,104 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
 
                 if (trailType is null)
                 {
-                    _logger.LogWarning(
-                        "[AuditingInterceptor] Failed to determine audit trail type for entity {EntityName} (ID: {EntityId}). " +
-                        "Entity state {EntityState} is not supported.",
-                        entityName,
-                        primaryKey,
-                        entry.State);
+                    logger.LogWarning(
+                        "[AuditingInterceptor] Unsupported entity state {EntityState} for {EntityName} (ID: {EntityId}).",
+                        entry.State, entry.Entity.GetType().Name, entry.Entity.Id);
                     continue;
                 }
 
-                var oldValues = GetChangedValuesAsJson(entry, original: true);
-                var newValues = GetChangedValuesAsJson(entry, original: false);
-                var changedColumns = GetChangedColumnsAsJson(entry);
+                var owned = GetOwnedEntries(entry);
 
-                var auditTrail = new AuditTrail(
+                auditEntries.Add(new AuditTrail(
                     userId,
-                    entityName,
-                    primaryKey,
+                    entry.Entity.GetType().Name,
+                    entry.Entity.Id.ToString(),
                     trailType.Value,
-                    oldValues,
-                    newValues,
-                    changedColumns);
-
-                auditEntries.Add(auditTrail);
+                    GetValuesAsJson(entry, owned, useOriginalValues: true,  includeAll: entry.State == EntityState.Deleted,  onlyForStates: [EntityState.Modified, EntityState.Deleted]),
+                    GetValuesAsJson(entry, owned, useOriginalValues: false, includeAll: entry.State == EntityState.Added,    onlyForStates: [EntityState.Added, EntityState.Modified]),
+                    GetChangedColumnsAsJson(entry, owned)));
             }
 
             return auditEntries;
         }
 
-        private static string GetChangedValuesAsJson(EntityEntry<BaseEntity> entry, bool original)
+        private static string GetValuesAsJson(
+            EntityEntry<BaseEntity> entry,
+            IReadOnlyCollection<(string Nav, EntityEntry E)> ownedEntries,
+            bool useOriginalValues,
+            bool includeAll,
+            EntityState[] onlyForStates)
         {
+            if (!onlyForStates.Contains(entry.State))
+                return string.Empty;
+
             var values = new Dictionary<string, object?>();
 
-            foreach (var property in entry.Properties)
+            foreach (var prop in entry.Properties)
             {
-                if (property.IsTemporary)
+                if (prop.IsTemporary || prop.Metadata.IsForeignKey())
                     continue;
 
-                var value = original ? property.OriginalValue : property.CurrentValue;
-                values[property.Metadata.Name] = value;
+                if (!includeAll && Equals(prop.OriginalValue, prop.CurrentValue))
+                    continue;
+
+                values[PropertyName(null, prop)] = useOriginalValues ? prop.OriginalValue : prop.CurrentValue;
+            }
+
+            foreach (var (nav, ownedEntry) in ownedEntries)
+            {
+                foreach (var prop in ownedEntry.Properties)
+                {
+                    if (prop.IsTemporary || prop.Metadata.IsForeignKey() || prop.Metadata.IsPrimaryKey())
+                        continue;
+
+                    if (!includeAll && Equals(prop.OriginalValue, prop.CurrentValue))
+                        continue;
+
+                    values[PropertyName(nav, prop)] = useOriginalValues ? prop.OriginalValue : prop.CurrentValue;
+                }
             }
 
             return values.Count > 0 ? JsonSerializer.Serialize(values) : string.Empty;
         }
 
-        private static string GetChangedColumnsAsJson(EntityEntry<BaseEntity> entry)
+        private static string GetChangedColumnsAsJson(
+            EntityEntry<BaseEntity> entry,
+            IReadOnlyCollection<(string Nav, EntityEntry E)> ownedEntries)
         {
-            var changedColumns = entry.Properties
-                .Where(p => p.IsModified && !p.IsTemporary)
-                .Select(p => p.Metadata.Name)
+            if (entry.State != EntityState.Modified)
+                return string.Empty;
+
+            var changed = entry.Properties
+                .Where(p => !p.IsTemporary && !p.Metadata.IsForeignKey() && !Equals(p.OriginalValue, p.CurrentValue))
+                .Select(p => PropertyName(null, p))
                 .ToList();
 
-            return changedColumns.Count > 0 ? JsonSerializer.Serialize(changedColumns) : string.Empty;
+            foreach (var (nav, ownedEntry) in ownedEntries)
+            {
+                changed.AddRange(ownedEntry.Properties
+                    .Where(p => !p.IsTemporary && !p.Metadata.IsForeignKey() && !p.Metadata.IsPrimaryKey()
+                                && !Equals(p.OriginalValue, p.CurrentValue))
+                    .Select(p => PropertyName(nav, p)));
+            }
+
+            return changed.Count > 0 ? JsonSerializer.Serialize(changed) : string.Empty;
+        }
+
+        private static IReadOnlyCollection<(string Nav, EntityEntry E)> GetOwnedEntries(EntityEntry<BaseEntity> ownerEntry)
+        {
+            return ownerEntry.References
+                .Where(r => r.TargetEntry?.Metadata.IsOwned() == true)
+                .Select(r => (r.Metadata.Name, r.TargetEntry!))
+                .ToList();
+        }
+
+        private static string PropertyName(string? prefix, PropertyEntry property)
+        {
+            if (string.IsNullOrWhiteSpace(prefix))
+                return property.Metadata.Name;
+
+            return property.Metadata.Name == "Value" ? prefix : $"{prefix}.{property.Metadata.Name}";
         }
     }
 }

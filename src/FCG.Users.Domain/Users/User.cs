@@ -13,14 +13,6 @@ namespace FCG.Users.Domain.Users
         public Role Role { get; private set; }
         public ICollection<RefreshToken>? RefreshTokens { get; }
 
-        #region Audits properties
-        // Implementação explícita - expõe via interface, mas mantém protected set
-        DateTime IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value; }
-        DateTime? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value; }
-        string IAuditableEntity.CreatedBy { get => CreatedBy; set => CreatedBy = value; }
-        string? IAuditableEntity.UpdatedBy { get => UpdatedBy; set => UpdatedBy = value; }
-        #endregion
-
         public static User CreateRegularUser(string name, string email, string password)
         {
             var user = new User(name, email, password, Role.User);
@@ -41,7 +33,7 @@ namespace FCG.Users.Domain.Users
 
         public void UpdatePassword(string password)
         {
-            Password = Password.CreateFromHash(password);
+            Password.ChangeHash(password);
             UpdatedAt = DateTime.UtcNow;
         }
 

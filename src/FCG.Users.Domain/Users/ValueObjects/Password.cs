@@ -3,13 +3,21 @@ using FCG.Users.Messages;
 
 namespace FCG.Users.Domain.Users.ValueObjects
 {
-    public record Password
+    public sealed class Password
     {
-        public string Value { get; }
+        public string Value { get; private set; }
 
         private Password(string value)
         {
             Value = value;
+        }
+
+        internal void ChangeHash(string newHash)
+        {
+            if (string.IsNullOrWhiteSpace(newHash))
+                throw new ArgumentNullException(nameof(newHash), ResourceMessages.PasswordCannotBeNullOrEmpty);
+
+            Value = newHash;
         }
 
         public static Password Create(string value)

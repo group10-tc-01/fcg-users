@@ -11,8 +11,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Users.Infrastructure.SqlServer.Migrations
 {
-    [ExcludeFromCodeCoverage]
     [DbContext(typeof(FcgUserDbContext))]
+    [ExcludeFromCodeCoverage]
     partial class FcgUserDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -46,6 +46,9 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
                     b.Property<string>("OldValues")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("PerformedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("PrimaryKey")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -54,14 +57,11 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EntityName");
 
-                    b.ToTable("audit_trails", (string)null);
+                    b.ToTable("AuditTrail", (string)null);
                 });
 
             modelBuilder.Entity("FCG.Users.Domain.RefreshTokens.RefreshToken", b =>
@@ -74,10 +74,6 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
@@ -100,9 +96,6 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -124,10 +117,6 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -140,9 +129,6 @@ namespace FCG.Users.Infrastructure.SqlServer.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
