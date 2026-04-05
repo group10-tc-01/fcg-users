@@ -378,48 +378,80 @@ A aplicação publica eventos de domínio via **Apache Kafka** para comunicaçã
 
 ---
 
-## ⚙️ Configuração e Execução
+## ⚙️ Configuração de Ambiente
+
+### Variáveis e Secrets Necessários
+
+| Variável | Descrição | Obrigatório | Exemplo |
+|----------|-----------|:-----------:|---------|
+| `ConnectionStrings:DefaultConnection` | Connection string do SQL Server | ✅ Sim | `Server=localhost;Database=fcg_user;User Id=sa;Password=SuaSenha;TrustServerCertificate=True;` |
+| `JwtSettings:SecretKey` | Chave secreta para assinatura JWT | ✅ Sim | `chave-base64-com-minimo-32-caracteres` |
+| `KafkaSettings:SaslUsername` | Usuário SASL do Kafka (produção) | ⚠️ Produção | `$ConnectionString` |
+| `KafkaSettings:SaslPassword` | Senha SASL do Kafka (produção) | ⚠️ Produção | `Endpoint=sb:...` |
 
 ### Pré-requisitos
 
-- ✅ .NET 8 SDK
-- ✅ Docker e Docker Compose
-- ✅ SQL Server 2022
-- ✅ Apache Kafka (via Docker)
+- .NET 8 SDK
+- Docker e Docker Compose
+- SQL Server 2022
+- Apache Kafka (via Docker)
 
-### Configuração de Ambiente
-
-**appsettings.json**
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost,1433;Database=fcg_user;User Id=sa;Password=YourPassword123;TrustServerCertificate=True;"
-  },
-  "JwtSettings": {
-    "SecretKey": "your-super-secret-key-min-32-chars",
-    "Issuer": "FCG.Users.API",
-    "Audience": "FCG.Users.Client",
-    "ExpirationInMinutes": 60,
-    "RefreshTokenExpirationInDays": 7
-  },
-  "KafkaSettings": {
-    "BootstrapServers": "localhost:9092",
-    "GroupId": "fcg-users-api"
-  }
-}
-```
-
-### Executar com Docker Compose
+### Configuração Local (user-secrets)
 
 ```bash
-docker-compose up -d
+cd src/FCG.Users.WebApi
+
+# Inicializar user-secrets (já feito se o .csproj contém UserSecretsId)
+dotnet user-secrets init
+
+# Configurar os secrets obrigatórios
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=127.0.0.1;Database=fcg_user;User Id=sa;Password=SuaSenhaForte123;TrustServerCertificate=True;"
+dotnet user-secrets set "JwtSettings:SecretKey" "sua-chave-secreta-jwt-com-minimo-32-caracteres"
+
+# Secrets opcionais (Kafka SASL - apenas para ambiente com Event Hubs)
+dotnet user-secrets set "KafkaSettings:SaslUsername" "$ConnectionString"
+dotnet user-secrets set "KafkaSettings:SaslPassword" "Endpoint=sb:..."
+
+# Verificar secrets configurados
+dotnet user-secrets list
 ```
 
+### Execução via Docker
+
+1. Copie o arquivo `.env.example` para `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Preencha as variáveis no `.env`:
+   ```env
+   SA_PASSWORD=SuaSenhaForte123
+   JWT_SECRET_KEY=sua-chave-secreta-jwt-com-minimo-32-caracteres
+   SEQ_ADMIN_PASSWORD=SenhaDoSeq123
+   ```
+
+3. Suba os serviços:
+   ```bash
+   docker-compose up -d
+   ```
+
 Serviços disponíveis:
-- 🐳 **SQL Server**: `localhost:1433`
-- 📊 **Seq (Logs)**: `http://localhost:5341`
-- 📨 **Kafka**: `localhost:9092`
-- 🎛️ **Kafka UI**: `http://localhost:8080`
+- SQL Server: `localhost:1433`
+- Seq (Logs): `http://localhost:5341`
+- Kafka: `localhost:9092`
+- Kafka UI: `http://localhost:8081`
+
+### Arquivos que NUNCA devem ser commitados
+
+| Arquivo | Motivo |
+|---------|--------|
+| `appsettings.Development.json` | Pode conter secrets locais |
+| `appsettings.Production.json` | Contém configurações de produção |
+| `appsettings.Docker.json` | Contém configurações de infraestrutura |
+| `.env` | Contém senhas e chaves reais |
+| `secrets.json` | Arquivo de secrets do .NET |
+
+Esses arquivos já estão no `.gitignore` do repositório.
 
 ---
 
