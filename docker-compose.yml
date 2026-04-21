@@ -4,7 +4,7 @@ services:
         container_name: sqlserver-fcg-users
         environment:
             - ACCEPT_EULA=Y
-            - SA_PASSWORD=${SA_PASSWORD:?Configure SA_PASSWORD in .env}
+            - SA_PASSWORD=YourPassword123
             - MSSQL_PID=Developer
             - MSSQL_DATABASE=fcg_user
         ports:
@@ -14,7 +14,7 @@ services:
         networks:
             - network-fcg
         healthcheck:
-            test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -Q "SELECT 1" -C || exit 1
+            test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "YourPassword123" -Q "SELECT 1" -C || exit 1
             interval: 10s
             timeout: 3s
             retries: 10
@@ -25,7 +25,7 @@ services:
         container_name: seq-fcg-users
         environment:
             - ACCEPT_EULA=Y
-            - SEQ_FIRSTRUN_ADMINPASSWORD=${SEQ_ADMIN_PASSWORD:?Configure SEQ_ADMIN_PASSWORD in .env}
+            - SEQ_FIRSTRUN_ADMINPASSWORD=YourPassword123
         ports:
             - "5341:5341"
             - "5342:80"
@@ -50,8 +50,6 @@ services:
         environment:
             - ASPNETCORE_ENVIRONMENT=Docker
             - ASPNETCORE_URLS=http://+:8080;http://+:8081
-            - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=fcg_user;User Id=sa;Password=${SA_PASSWORD:?Configure SA_PASSWORD in .env};TrustServerCertificate=True;
-            - JwtSettings__SecretKey=${JWT_SECRET_KEY:?Configure JWT_SECRET_KEY in .env}
         networks:
             - network-fcg
         restart: unless-stopped

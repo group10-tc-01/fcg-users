@@ -418,19 +418,7 @@ dotnet user-secrets list
 
 ### Execução via Docker
 
-1. Copie o arquivo `.env.example` para `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Preencha as variáveis no `.env`:
-   ```env
-   SA_PASSWORD=<sua-senha>
-   JWT_SECRET_KEY=sua-chave-secreta-jwt-com-minimo-32-caracteres
-   SEQ_ADMIN_PASSWORD=<senha-seq>
-   ```
-
-3. Suba os serviços:
+1. Suba os serviços:
    ```bash
    docker-compose up -d
    ```
@@ -448,7 +436,6 @@ Serviços disponíveis:
 | `appsettings.Development.json` | Pode conter secrets locais |
 | `appsettings.Production.json` | Contém configurações de produção |
 | `appsettings.Docker.json` | Contém configurações de infraestrutura |
-| `.env` | Contém senhas e chaves reais |
 | `secrets.json` | Arquivo de secrets do .NET |
 
 Esses arquivos já estão no `.gitignore` do repositório.
