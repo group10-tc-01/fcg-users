@@ -255,8 +255,8 @@ Request:
 
 Response:
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-  "refreshToken": "a1b2c3d4e5f6...",
+  "accessToken": "<access-token>",
+  "refreshToken": "<refresh-token>",
   "expiresIn": 3600
 }
 ```
@@ -265,13 +265,13 @@ Response:
 ```json
 Request:
 {
-  "refreshToken": "a1b2c3d4e5f6..."
+  "refreshToken": "<refresh-token>"
 }
 
 Response:
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-  "refreshToken": "g7h8i9j0k1l2...",
+  "accessToken": "<access-token>",
+  "refreshToken": "<refresh-token>",
   "expiresIn": 3600
 }
 ```
@@ -384,7 +384,7 @@ A aplicação publica eventos de domínio via **Apache Kafka** para comunicaçã
 
 | Variável | Descrição | Obrigatório | Exemplo |
 |----------|-----------|:-----------:|---------|
-| `ConnectionStrings:DefaultConnection` | Connection string do SQL Server | ✅ Sim | `Server=localhost;Database=fcg_user;User Id=sa;Password=SuaSenha;TrustServerCertificate=True;` |
+| `ConnectionStrings:DefaultConnection` | Connection string do SQL Server | ✅ Sim | `Server=localhost;Database=fcg_user;User Id=sa;Password=<sua-senha>;TrustServerCertificate=True;` |
 | `JwtSettings:SecretKey` | Chave secreta para assinatura JWT | ✅ Sim | `chave-base64-com-minimo-32-caracteres` |
 | `KafkaSettings:SaslUsername` | Usuário SASL do Kafka (produção) | ⚠️ Produção | `$ConnectionString` |
 | `KafkaSettings:SaslPassword` | Senha SASL do Kafka (produção) | ⚠️ Produção | `Endpoint=sb:...` |
@@ -405,7 +405,7 @@ cd src/FCG.Users.WebApi
 dotnet user-secrets init
 
 # Configurar os secrets obrigatórios
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=127.0.0.1;Database=fcg_user;User Id=sa;Password=SuaSenhaForte123;TrustServerCertificate=True;"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=127.0.0.1;Database=fcg_user;User Id=sa;Password=<sua-senha>;TrustServerCertificate=True;"
 dotnet user-secrets set "JwtSettings:SecretKey" "sua-chave-secreta-jwt-com-minimo-32-caracteres"
 
 # Secrets opcionais (Kafka SASL - apenas para ambiente com Event Hubs)
@@ -425,9 +425,9 @@ dotnet user-secrets list
 
 2. Preencha as variáveis no `.env`:
    ```env
-   SA_PASSWORD=SuaSenhaForte123
+   SA_PASSWORD=<sua-senha>
    JWT_SECRET_KEY=sua-chave-secreta-jwt-com-minimo-32-caracteres
-   SEQ_ADMIN_PASSWORD=SenhaDoSeq123
+   SEQ_ADMIN_PASSWORD=<senha-seq>
    ```
 
 3. Suba os serviços:

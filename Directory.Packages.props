@@ -27,6 +27,7 @@
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="8.0.0" />
 
     <!-- Web API -->
     <PackageVersion Include="Asp.Versioning.Http" Version="8.1.0" />

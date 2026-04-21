@@ -1,0 +1,13 @@
+title = "FCG Users Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore local generated artifacts outside the GitHub checkout"
+paths = [
+  '''(^|/)\.vs/''',
+  '''(^|/)bin/''',
+  '''(^|/)obj/''',
+  '''src/FCG\.Users\.WebApi/appsettings\.Development\.json'''
+]
