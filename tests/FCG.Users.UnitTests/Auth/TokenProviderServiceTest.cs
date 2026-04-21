@@ -20,7 +20,7 @@ namespace FCG.Users.UnitTests.Auth
         public void Given_ValidBearerToken_When_GetToken_Then_ShouldReturnToken()
         {
             // Arrange
-            var expectedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ";
+            var expectedToken = "sample-access-token";
             var authorizationHeader = $"Bearer {expectedToken}";
 
             var httpContext = new DefaultHttpContext();
@@ -38,7 +38,7 @@ namespace FCG.Users.UnitTests.Auth
         public void Given_BearerTokenWithExtraSpaces_When_GetToken_Then_ShouldReturnTrimmedToken()
         {
             // Arrange
-            var expectedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+            var expectedToken = "sample-access-token";
             var authorizationHeader = $"Bearer   {expectedToken}   ";
 
             var httpContext = new DefaultHttpContext();

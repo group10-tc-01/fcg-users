@@ -6,6 +6,14 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["Directory.Build.props", "./"]
+COPY ["Directory.Packages.props", "./"]
+COPY ["src/FCG.Users.Application/FCG.Users.Application.csproj", "src/FCG.Users.Application/"]
+COPY ["src/FCG.Users.Domain/FCG.Users.Domain.csproj", "src/FCG.Users.Domain/"]
+COPY ["src/FCG.Users.Infrastructure.Auth/FCG.Users.Infrastructure.Auth.csproj", "src/FCG.Users.Infrastructure.Auth/"]
+COPY ["src/FCG.Users.Infrastructure.Kafka/FCG.Users.Infrastructure.Kafka.csproj", "src/FCG.Users.Infrastructure.Kafka/"]
+COPY ["src/FCG.Users.Infrastructure.SqlServer/FCG.Users.Infrastructure.SqlServer.csproj", "src/FCG.Users.Infrastructure.SqlServer/"]
+COPY ["src/FCG.Users.Messages/FCG.Users.Messages.csproj", "src/FCG.Users.Messages/"]
 COPY ["src/FCG.Users.WebApi/FCG.Users.WebApi.csproj", "src/FCG.Users.WebApi/"]
 RUN dotnet restore "./src/FCG.Users.WebApi/FCG.Users.WebApi.csproj"
 COPY . .
