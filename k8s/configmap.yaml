@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fcg-users-config
+  namespace: fcg-system
+  labels:
+    app.kubernetes.io/name: fcg-users
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  Observability__ServiceName: "FCG.Users"
+  Observability__EnableOtlpExporter: "true"
+  Observability__OtlpEndpoint: ""
+  KafkaSettings__UserCreatedTopic: "user-created"
+  KafkaSettings__UseSaslSsl: "true"
+  JwtSettings__Issuer: "FCG-User"
+  JwtSettings__Audience: "FCG-Client"
+  JwtSettings__AccessTokenExpirationMinutes: "60"
+  JwtSettings__RefreshTokenExpirationDays: "7"

@@ -26,7 +26,7 @@ jobs:
       k8s_namespace: fcg-system
       k8s_deployment_name: fcg-users
       k8s_container_name: fcg-users
-      k8s_manifests_path: ""
+      k8s_manifests_path: "k8s"
       environment: production
       healthcheck_url: ${{ vars.USERS_HEALTHCHECK_URL }}
     secrets: inherit
