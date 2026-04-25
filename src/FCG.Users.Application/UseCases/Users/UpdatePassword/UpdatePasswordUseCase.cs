@@ -41,7 +41,7 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
 
             var newPassword = Password.Create(request.NewPassword);
 
-            string hashedPassword = _passwordEncrypterService.Encrypt(newPassword.Value);
+            var hashedPassword = _passwordEncrypterService.Encrypt(newPassword.Value);
 
             _logger.LogInformation("[UpdateUserUseCase] Password updated for user: {UserId}", user.Id);
 
@@ -52,7 +52,9 @@ namespace FCG.Users.Application.UseCases.Users.UpdatePassword
             _logger.LogInformation("[UpdateUserUseCase] Successfully updated password for user: {UserId}", user.Id);
 
             if (user.UpdatedAt == null)
+            {
                 throw new DomainException(ResourceMessages.UserUpdatePasswordUpdateAtIsNull);
+            }
 
             return new UpdatePasswordResponse(user.Id, user.UpdatedAt.Value);
         }

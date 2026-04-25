@@ -60,10 +60,14 @@ namespace FCG.Users.Infrastructure.Kafka.DependencyInjection
             if (settings.UseSaslSsl)
             {
                 if (string.IsNullOrWhiteSpace(settings.SaslUsername))
+                {
                     throw new InvalidOperationException("KafkaSettings:SaslUsername must be configured when UseSaslSsl is true.");
+                }
 
                 if (string.IsNullOrWhiteSpace(settings.SaslPassword))
+                {
                     throw new InvalidOperationException("KafkaSettings:SaslPassword must be configured when UseSaslSsl is true.");
+                }
             }
         }
     }

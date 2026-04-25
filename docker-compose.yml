@@ -14,7 +14,7 @@ services:
         networks:
             - network-fcg
         healthcheck:
-            test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "YourPassword123" -Q "SELECT 1" -C || exit 1
+            test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "YourPassword123" -1Q "SELECT 1" -C || exit 1
             interval: 10s
             timeout: 3s
             retries: 10

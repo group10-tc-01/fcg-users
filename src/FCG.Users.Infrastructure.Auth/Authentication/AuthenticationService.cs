@@ -71,7 +71,9 @@ namespace FCG.Users.Infrastructure.Auth.Authentication
             var token = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
 
             if (token?.IsValid == true)
+            {
                 return token.UserId.ToString();
+            }
 
             return null;
         }

@@ -81,7 +81,9 @@ namespace FCG.Users.Infrastructure.Kafka.Producer
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
 
             _producer?.Flush(TimeSpan.FromSeconds(10));
             _producer?.Dispose();

@@ -15,7 +15,9 @@ namespace FCG.Users.Domain.Users.ValueObjects
         internal void ChangeHash(string newHash)
         {
             if (string.IsNullOrWhiteSpace(newHash))
+            {
                 throw new ArgumentNullException(nameof(newHash), ResourceMessages.PasswordCannotBeNullOrEmpty);
+            }
 
             Value = newHash;
         }
@@ -23,19 +25,29 @@ namespace FCG.Users.Domain.Users.ValueObjects
         public static Password Create(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
+            {
                 throw new DomainException(ResourceMessages.PasswordCannotBeNullOrEmpty);
+            }
 
             if (value.Length < 8)
+            {
                 throw new DomainException(ResourceMessages.PasswordMinimumLength);
+            }
 
             if (!ContainsLetter(value))
+            {
                 throw new DomainException(ResourceMessages.PasswordMustContainLetter);
+            }
 
             if (!ContainsDigit(value))
+            {
                 throw new DomainException(ResourceMessages.PasswordMustContainNumber);
+            }
 
             if (!ContainsSpecialCharacter(value))
+            {
                 throw new DomainException(ResourceMessages.PasswordMustContainSpecialCharacter);
+            }
 
             return new Password(value);
         }
@@ -43,7 +55,9 @@ namespace FCG.Users.Domain.Users.ValueObjects
         public static Password CreateFromHash(string hashValue)
         {
             if (string.IsNullOrWhiteSpace(hashValue))
+            {
                 throw new ArgumentNullException(nameof(hashValue), ResourceMessages.PasswordCannotBeNullOrEmpty);
+            }
 
             return new Password(hashValue);
         }
