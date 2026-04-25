@@ -126,7 +126,7 @@ namespace FCG.Users.IntegratedTests.Configurations
         {
             var users = new List<User>();
 
-            for (int i = 1; i <= itemsQuantity; i++)
+            for (var i = 1; i <= itemsQuantity; i++)
             {
                 var user = new UserBuilder().Build();
                 users.Add(user);

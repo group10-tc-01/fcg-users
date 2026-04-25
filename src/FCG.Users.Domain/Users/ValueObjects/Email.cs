@@ -16,13 +16,19 @@ namespace FCG.Users.Domain.Users.ValueObjects
         public static Email Create(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
+            {
                 throw new DomainException(ResourceMessages.EmailCannotBeNullOrEmpty);
+            }
 
             if (value.Length > 255)
+            {
                 throw new DomainException(ResourceMessages.EmailCannotExceed255Characters);
+            }
 
             if (!IsValidEmail(value))
+            {
                 throw new DomainException(ResourceMessages.InvalidEmailFormat);
+            }
 
             return new Email(value);
         }

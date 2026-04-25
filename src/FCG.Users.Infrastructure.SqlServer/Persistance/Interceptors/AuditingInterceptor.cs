@@ -21,8 +21,10 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
                 context.ChangeTracker.DetectChanges();
 
                 foreach (var entry in GetAuditEntries(context))
+                {
                     context.AuditTrail.Add(entry);
                 }
+            }
 
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
@@ -35,10 +37,14 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
             foreach (var entry in context.ChangeTracker.Entries<BaseEntity>())
             {
                 if (entry.Entity is not IAuditableEntity)
+                {
                     continue;
+                }
 
                 if (entry.State is EntityState.Detached or EntityState.Unchanged)
+                {
                     continue;
+                }
 
                 var trailType = entry.State switch
                 {
@@ -79,17 +85,23 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
             EntityState[] onlyForStates)
         {
             if (!onlyForStates.Contains(entry.State))
+            {
                 return string.Empty;
+            }
 
             var values = new Dictionary<string, object?>();
 
             foreach (var prop in entry.Properties)
             {
                 if (prop.IsTemporary || prop.Metadata.IsForeignKey())
+                {
                     continue;
+                }
 
                 if (!includeAll && Equals(prop.OriginalValue, prop.CurrentValue))
+                {
                     continue;
+                }
 
                 values[PropertyName(null, prop)] = useOriginalValues ? prop.OriginalValue : prop.CurrentValue;
             }
@@ -99,10 +111,14 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
                 foreach (var prop in ownedEntry.Properties)
                 {
                     if (prop.IsTemporary || prop.Metadata.IsForeignKey() || prop.Metadata.IsPrimaryKey())
+                    {
                         continue;
+                    }
 
                     if (!includeAll && Equals(prop.OriginalValue, prop.CurrentValue))
+                    {
                         continue;
+                    }
 
                     values[PropertyName(nav, prop)] = useOriginalValues ? prop.OriginalValue : prop.CurrentValue;
                 }
@@ -116,7 +132,9 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
             IReadOnlyCollection<(string Nav, EntityEntry E)> ownedEntries)
         {
             if (entry.State != EntityState.Modified)
+            {
                 return string.Empty;
+            }
 
             var changed = entry.Properties
                 .Where(p => !p.IsTemporary && !p.Metadata.IsForeignKey() && !Equals(p.OriginalValue, p.CurrentValue))
@@ -145,7 +163,9 @@ namespace FCG.Users.Infrastructure.SqlServer.Persistance.Interceptors
         private static string PropertyName(string? prefix, PropertyEntry property)
         {
             if (string.IsNullOrWhiteSpace(prefix))
+            {
                 return property.Metadata.Name;
+            }
 
             return property.Metadata.Name == "Value" ? prefix : $"{prefix}.{property.Metadata.Name}";
         }
