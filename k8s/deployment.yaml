@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fcg-users
+  namespace: fcg-system
+  labels:
+    app.kubernetes.io/name: fcg-users
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fcg-users
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fcg-users
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: fcg-users-sa
+      containers:
+        - name: fcg-users
+          image: "${ACR_NAME}.azurecr.io/fcg-users:latest"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: fcg-users-config
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: fcg-users-secrets
+                  key: ConnectionStrings__DefaultConnection
+            - name: JwtSettings__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: fcg-users-secrets
+                  key: JwtSettings__SecretKey
+            - name: KafkaSettings__BootstrapServers
+              valueFrom:
+                secretKeyRef:
+                  name: fcg-users-secrets
+                  key: KafkaSettings__BootstrapServers
+            - name: KafkaSettings__SaslUsername
+              valueFrom:
+                secretKeyRef:
+                  name: fcg-users-secrets
+                  key: KafkaSettings__SaslUsername
+            - name: KafkaSettings__SaslPassword
+              valueFrom:
+                secretKeyRef:
+                  name: fcg-users-secrets
+                  key: KafkaSettings__SaslPassword
+          volumeMounts:
+            - name: secrets-store
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: fcg-users-secrets
