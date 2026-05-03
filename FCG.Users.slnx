@@ -1,11 +1,26 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/FCG.Users.Application/FCG.Users.Application.csproj" />
+  <Folder Name="/Itens de Solução/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path=".gitleaks.toml" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/0 - Domain/">
     <Project Path="src/FCG.Users.Domain/FCG.Users.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/1 - Application/">
+    <Project Path="src/FCG.Users.Application/FCG.Users.Application.csproj" />
+    <Project Path="src/FCG.Users.Messages/FCG.Users.Messages.csproj" />
+  </Folder>
+  <Folder Name="/src/2 - Infrastructure/">
     <Project Path="src/FCG.Users.Infrastructure.Auth/FCG.Users.Infrastructure.Auth.csproj" />
     <Project Path="src/FCG.Users.Infrastructure.Kafka/FCG.Users.Infrastructure.Kafka.csproj" />
     <Project Path="src/FCG.Users.Infrastructure.SqlServer/FCG.Users.Infrastructure.SqlServer.csproj" />
-    <Project Path="src/FCG.Users.Messages/FCG.Users.Messages.csproj" />
+  </Folder>
+  <Folder Name="/src/3 - WebApi/">
     <Project Path="src/FCG.Users.WebApi/FCG.Users.WebApi.csproj" />
   </Folder>
   <Folder Name="/tests/">
