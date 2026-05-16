@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: fcg-users-service
-  namespace: fcg-system
+  namespace: fcg-users
   labels:
     app.kubernetes.io/name: fcg-users
 spec:
