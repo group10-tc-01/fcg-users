@@ -10,9 +10,9 @@ spec:
   parameters:
     usePodIdentity: "false"
     useVMManagedIdentity: "true"
-    userAssignedIdentityID: "dd029ae6-630e-4a7d-a8f1-07183f9484e6"
-    keyvaultName: "fcg-kv-fiap-2026"
-    tenantId: "cf36141c-ddd7-45a7-b073-111f66d0b30c"
+    userAssignedIdentityID: "__AKS_KEYVAULT_CLIENT_ID__"
+    keyvaultName: "__KEY_VAULT_NAME__"
+    tenantId: "__AZURE_TENANT_ID__"
     objects: |
       array:
         - |
