@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fcg-users
-  namespace: fcg-system
+  namespace: fcg-users
   labels:
     app.kubernetes.io/name: fcg-users
 spec:
@@ -19,12 +19,11 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: fcg-users
-        azure.workload.identity/use: "true"
     spec:
       serviceAccountName: fcg-users-sa
       containers:
         - name: fcg-users
-          image: "${ACR_NAME}.azurecr.io/fcg-users:latest"
+          image: fcgacrfiap2026.azurecr.io/fcg-users:main
           ports:
             - containerPort: 8080
               protocol: TCP
@@ -44,13 +43,13 @@ spec:
                   key: JwtSettings__SecretKey
             - name: KafkaSettings__BootstrapServers
               valueFrom:
-                secretKeyRef:
-                  name: fcg-users-secrets
+                configMapKeyRef:
+                  name: fcg-users-config
                   key: KafkaSettings__BootstrapServers
             - name: KafkaSettings__SaslUsername
               valueFrom:
-                secretKeyRef:
-                  name: fcg-users-secrets
+                configMapKeyRef:
+                  name: fcg-users-config
                   key: KafkaSettings__SaslUsername
             - name: KafkaSettings__SaslPassword
               valueFrom:

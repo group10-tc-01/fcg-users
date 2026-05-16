@@ -2,7 +2,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: fcg-users-hpa
-  namespace: fcg-system
+  namespace: fcg-users
   labels:
     app.kubernetes.io/name: fcg-users
 spec:
