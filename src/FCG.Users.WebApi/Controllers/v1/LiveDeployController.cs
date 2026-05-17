@@ -1,4 +1,5 @@
-﻿using FCG.Users.Application.UseCases.Users.Register;
+﻿using System.Diagnostics.CodeAnalysis;
+using FCG.Users.Application.UseCases.Users.Register;
 using FCG.Users.Application.UseCases.Users.UpdatePassword;
 using FCG.Users.WebApi.Models;
 using MediatR;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FCG.Users.WebApi.Controllers.v1
 {
+    [ExcludeFromCodeCoverage]
     public class LiveDeployController(IMediator mediator) : FcgUserBaseController(mediator)
     {
 
